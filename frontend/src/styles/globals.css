@@ -1,0 +1,4 @@
+/* Global overrides or custom styles */
+body {
+  @apply bg-white text-gray-800 antialiased;
+}

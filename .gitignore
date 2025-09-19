@@ -1,0 +1,49 @@
+# Node.js dependencies
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Production build
+dist/
+build/
+
+# Logs
+*.log
+logs
+*.out
+*.pid
+*.gz
+
+# IDE / editor settings
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# Env files
+.env
+.env.local
+.env.*.local
+
+# TypeScript build cache
+*.tsbuildinfo
+
+# Optional: Ignore lock files (if you want to only commit package.json)
+# package-lock.json
+# yarn.lock
+# pnpm-lock.yaml
+
+# Python (for later FastAPI backend)
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.db
+*.sqlite3
+*.egg-info/
+.env
+.venv/
+venv/
