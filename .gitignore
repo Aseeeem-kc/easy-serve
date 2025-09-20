@@ -1,4 +1,6 @@
-# Node.js dependencies
+# =========================
+# Node.js
+# =========================
 node_modules/
 npm-debug.log*
 yarn-debug.log*
@@ -8,14 +10,42 @@ yarn-error.log*
 dist/
 build/
 
+# TypeScript build cache
+*.tsbuildinfo
+
+# Optional: Ignore lock files
+# package-lock.json
+# yarn.lock
+# pnpm-lock.yaml
+
+# =========================
+# Python / FastAPI
+# =========================
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.db
+*.sqlite3
+*.egg-info/
+*.egg
+.env
+.env.*
+.venv/
+venv/
+env/
+__pypackages__/
+
 # Logs
 *.log
-logs
+logs/
 *.out
 *.pid
 *.gz
 
-# IDE / editor settings
+# =========================
+# IDE / Editor
+# =========================
 .vscode/
 .idea/
 *.swp
@@ -23,27 +53,9 @@ logs
 .DS_Store
 Thumbs.db
 
-# Env files
-.env
-.env.local
-.env.*.local
-
-# TypeScript build cache
-*.tsbuildinfo
-
-# Optional: Ignore lock files (if you want to only commit package.json)
-# package-lock.json
-# yarn.lock
-# pnpm-lock.yaml
-
-# Python (for later FastAPI backend)
-__pycache__/
-*.pyc
-*.pyo
-*.pyd
-*.db
-*.sqlite3
-*.egg-info/
-.env
-.venv/
-venv/
+# =========================
+# Misc / OS
+# =========================
+*.bak
+*.tmp
+*.old
