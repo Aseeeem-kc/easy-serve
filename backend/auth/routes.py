@@ -20,18 +20,35 @@ router = APIRouter()
 
 # -------------------------
 # SIGNUP
-# -------------------------
+# ------------------------- 
+
+router = APIRouter()
+
 @router.post("/signup", response_model=UserResponse)
 def signup(user: UserCreate, db: Session = Depends(get_db)):
+    # Check if username already exists
     db_user = get_user(db, username=user.username)
     if db_user:
         raise HTTPException(status_code=400, detail="Username already registered")
 
+    # Hash password
     hashed_password = get_password_hash(user.password)
-    db_user = UserModel(username=user.username, hashed_password=hashed_password)
+
+    # Create new user
+    db_user = UserModel(
+        username=user.username,
+        company_name=user.company_name,
+        location=user.location,
+        pan_number=user.pan_number,
+        email=user.email,
+        phone_number=user.phone_number,
+        hashed_password=hashed_password,
+        is_active=True
+    )
     db.add(db_user)
     db.commit()
     db.refresh(db_user)
+
     return db_user
 
 
@@ -48,10 +65,10 @@ def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depend
             headers={"WWW-Authenticate": "Bearer"},
         )
 
-    # Create access token
+    # Creating access token
     access_token = create_access_token(data={"sub": user.username})
 
-    # Create refresh token
+    # Creating refresh token
     refresh_token, jti = create_refresh_token(data={"sub": user.username})
 
     # Save refresh token to DB
@@ -72,7 +89,7 @@ def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depend
         key="refresh_token",
         value=refresh_token,
         httponly=True,
-        secure=False, # Set to True in production with HTTPS
+        secure=False, # HTTP for now(dev ma HTTP)
         samesite="strict",
         max_age=7*24*60*60
     )
