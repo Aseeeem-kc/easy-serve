@@ -1,9 +1,9 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
-from auth.dependencies import get_db, authenticate_user, get_user
+from auth.dependencies import get_db, authenticate_user, get_user_by_email
 from auth.models import TokenData, Token
-from auth.schemas import UserCreate, UserResponse
+from auth.schemas import UserCreate, UserResponse, LoginSchema
 from user.models import User as UserModel
 from auth.utils import (
     get_password_hash, verify_password,
@@ -27,7 +27,7 @@ router = APIRouter()
 @router.post("/signup", response_model=UserResponse)
 def signup(user: UserCreate, db: Session = Depends(get_db)):
     # Check if username already exists
-    db_user = get_user(db, username=user.username)
+    db_user = get_user_by_email(db, email=user.email)
     if db_user:
         raise HTTPException(status_code=400, detail="Username already registered")
 
@@ -56,22 +56,18 @@ def signup(user: UserCreate, db: Session = Depends(get_db)):
 # LOGIN
 # -------------------------
 @router.post("/token", response_model=Token)
-def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
-    user = authenticate_user(db, form_data.username, form_data.password)
+def login(credentials: LoginSchema, db: Session = Depends(get_db)):
+    user = authenticate_user(db, credentials.email, credentials.password)
     if not user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Incorrect username or password",
+            detail="Incorrect email or password",
             headers={"WWW-Authenticate": "Bearer"},
         )
 
-    # Creating access token
-    access_token = create_access_token(data={"sub": user.username})
+    access_token = create_access_token(data={"sub": user.email})
+    refresh_token, _ = create_refresh_token(data={"sub": user.email})
 
-    # Creating refresh token
-    refresh_token, jti = create_refresh_token(data={"sub": user.username})
-
-    # Save refresh token to DB
     db_token = RefreshToken(
         token=refresh_token,
         user_id=user.id,
@@ -80,20 +76,14 @@ def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depend
     db.add(db_token)
     db.commit()
 
-    response = JSONResponse(content={
+    return {
         "access_token": access_token,
+        "refresh_token": refresh_token,
         "token_type": "bearer",
-        "username": user.username
-    })
-    response.set_cookie(
-        key="refresh_token",
-        value=refresh_token,
-        httponly=True,
-        secure=False, # HTTP for now(dev ma HTTP)
-        samesite="strict",
-        max_age=7*24*60*60
-    )
-    return response
+        "username": user.email
+    }
+
+
 
 
 # -------------------------
