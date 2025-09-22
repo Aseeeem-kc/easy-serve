@@ -22,3 +22,7 @@ class UserResponse(UserBase):
     is_active: bool
 
     model_config = ConfigDict(from_attributes=True)
+
+class LoginSchema(BaseModel):
+    email: EmailStr
+    password: str
