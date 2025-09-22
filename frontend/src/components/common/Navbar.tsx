@@ -1,5 +1,6 @@
 import React, { useState } from "react";
-import Logo from  "../../assets/easyservelogo.png";
+import { Link } from "react-router-dom";
+import Logo from "../../assets/easyservelogo.png";
 
 const Navbar: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -13,7 +14,6 @@ const Navbar: React.FC = () => {
             <img src={Logo} alt="EasyServe Logo" className="h-full object-contain mr-3" />
           </div>
 
-
           {/* Desktop Nav */}
           <nav className="hidden md:flex items-center space-x-8">
             <a href="#features" className="text-gray-600 hover:text-gray-900">Features</a>
@@ -23,10 +23,10 @@ const Navbar: React.FC = () => {
 
           {/* Desktop Buttons */}
           <div className="hidden md:flex items-center space-x-4">
-            <button className="text-gray-600 hover:text-gray-900">Sign In</button>
-            <button className="bg-gray-900 text-white px-4 py-2 rounded-lg hover:bg-gray-800">
-              Get Started
-            </button>
+            <Link to="/signup" className="text-gray-600 hover:text-gray-900">Sign Up</Link>
+            <Link to="/signin" className="bg-gray-900 text-white px-4 py-2 rounded-lg hover:bg-gray-800">
+              Sign In
+            </Link>
           </div>
 
           {/* Mobile menu toggle */}
