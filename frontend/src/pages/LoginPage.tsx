@@ -22,7 +22,7 @@ const LoginPage: React.FC = () => {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ email, password }), // <-- MUST BE JSON
+        body: JSON.stringify({ email, password }), 
       });
 
       if (!res.ok) {

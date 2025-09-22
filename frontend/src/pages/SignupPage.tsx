@@ -139,8 +139,15 @@ const SignupPage: React.FC = () => {
             {loading ? "Signing up..." : "Sign Up"}
           </button>
         </form>
+        <p className="mt-6 text-center text-sm text-gray-600">
+        Already have an account?{" "}
+        <a href="/signin" className="text-gray-900 font-medium hover:underline">
+            Log In
+          </a>
+      </p>
       </div>
     </div>
+    
   );
 };
 
