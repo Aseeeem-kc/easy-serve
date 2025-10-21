@@ -26,3 +26,8 @@ class UserResponse(UserBase):
 class LoginSchema(BaseModel):
     email: EmailStr
     password: str
+
+# Message response schema
+
+class MessageResponse(BaseModel):
+    message: str
