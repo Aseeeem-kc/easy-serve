@@ -1,18 +1,20 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Request
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 from auth.dependencies import get_db, authenticate_user, get_user_by_email
 from auth.models import TokenData, Token
-from auth.schemas import UserCreate, UserResponse, LoginSchema
+from auth.schemas import UserCreate, UserResponse, LoginSchema, MessageResponse
 from user.models import User as UserModel
 from auth.utils import (
     get_password_hash, verify_password,
-    create_access_token, create_refresh_token
+    create_access_token, create_refresh_token,
+    send_verification_email
 )
 from auth.models import RefreshToken
 from datetime import datetime, timedelta    
 from auth.utils import decode_token
 from fastapi.responses import JSONResponse
+from uuid import uuid4
 
 
 router = APIRouter()
@@ -21,21 +23,17 @@ router = APIRouter()
 # -------------------------
 # SIGNUP
 # ------------------------- 
-
-router = APIRouter()
-
-@router.post("/signup", response_model=UserResponse)
-def signup(user: UserCreate, db: Session = Depends(get_db)):
-    # Check if username already exists
+@router.post("/signup", response_model=MessageResponse)
+def signup(user: UserCreate, request: Request, db: Session = Depends(get_db)):
+    # Check existing email
     db_user = get_user_by_email(db, email=user.email)
     if db_user:
-        raise HTTPException(status_code=400, detail="Username already registered")
+        raise HTTPException(status_code=400, detail="Email already registered")
 
-    # Hash password
     hashed_password = get_password_hash(user.password)
+    token = str(uuid4())
 
-    # Create new user
-    db_user = UserModel(
+    new_user = UserModel(
         username=user.username,
         company_name=user.company_name,
         location=user.location,
@@ -43,13 +41,33 @@ def signup(user: UserCreate, db: Session = Depends(get_db)):
         email=user.email,
         phone_number=user.phone_number,
         hashed_password=hashed_password,
-        is_active=True
+        is_active=False,
+        email_token=token
     )
-    db.add(db_user)
+    db.add(new_user)
     db.commit()
-    db.refresh(db_user)
+    db.refresh(new_user)
 
-    return db_user
+    # Construct email verification URL
+    verify_url = f"{request.base_url}api/auth/verify/{token}"
+    send_verification_email(user.email, verify_url)
+
+    return {"message": "Signup successful! Please check your email to verify your account."}
+
+# -------------------------
+# EMAIL VERIFICATION
+# -------------------------
+
+@router.get("/verify/{token}")
+def verify_email(token: str, db: Session = Depends(get_db)):
+    user = db.query(UserModel).filter(UserModel.email_token == token).first()
+    if not user:
+        raise HTTPException(status_code=400, detail="Invalid or expired token")
+
+    user.is_active = True
+    user.email_token = None
+    db.commit()
+    return {"message": "Email verified successfully! You can now log in."}
 
 
 # -------------------------

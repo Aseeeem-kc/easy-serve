@@ -2,6 +2,16 @@ from passlib.context import CryptContext
 from jose import JWTError, jwt
 from datetime import datetime, timedelta
 import secrets
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
+
+EMAIL_USER = os.getenv("EMAIL_USER")
+EMAIL_PASS = os.getenv("EMAIL_PASS")
 
 # Config
 SECRET_KEY = ""
@@ -45,3 +55,66 @@ def decode_token(token: str, refresh: bool = False):
         return jwt.decode(token, secret, algorithms=[ALGORITHM])
     except JWTError:
         return None
+
+
+import os
+import smtplib
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+from dotenv import load_dotenv
+
+# Load environment variables from .env
+load_dotenv()
+
+EMAIL_USER = os.getenv("EMAIL_USER")
+EMAIL_PASS = os.getenv("EMAIL_PASS")
+EMAIL_HOST = os.getenv("EMAIL_HOST", "smtp.gmail.com")
+EMAIL_PORT = int(os.getenv("EMAIL_PORT", 587))
+
+def send_verification_email(to_email: str, verify_url: str):
+    """
+    Sends a verification email with a clickable button.
+    :param to_email: Recipient email address
+    :param verify_url: Full verification link (must include http:// or https://)
+    """
+    subject = "Verify your account"
+    
+    # HTML body with clickable button
+    body = f"""
+    <html>
+      <body>
+        <h3>Welcome!</h3>
+        <p>Click the button below to verify your email address:</p>
+        <p>
+          <a href="{verify_url}" style="
+            display: inline-block;
+            padding: 10px 20px;
+            font-size: 16px;
+            color: white;
+            background-color: #4CAF50;
+            text-decoration: none;
+            border-radius: 5px;
+          ">Verify Email</a>
+        </p>
+        <p>If the button doesn’t work, copy and paste this link into your browser:</p>
+        <p>{verify_url}</p>
+      </body>
+    </html>
+    """
+
+    # Create email message
+    msg = MIMEMultipart()
+    msg["From"] = EMAIL_USER
+    msg["To"] = to_email
+    msg["Subject"] = subject
+    msg.attach(MIMEText(body, "html"))
+
+    # Send email via Gmail SMTP
+    try:
+        with smtplib.SMTP(EMAIL_HOST, EMAIL_PORT) as server:
+            server.starttls()
+            server.login(EMAIL_USER, EMAIL_PASS)
+            server.send_message(msg)
+        print(f"Verification email sent to {to_email}")
+    except Exception as e:
+        print(f"Failed to send verification email: {e}")
