@@ -40,7 +40,7 @@ class ClientProfile(Base):
     user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), unique=True, nullable=False)
     
     # Business onboarding details
-    industry = Column(String(100), nullable=False)  # "E-commerce", "Retail"
+    industry = Column(String(100), nullable=False)  # "E-commerce", "Healthcare", etc.
     company_size = Column(String(50), nullable=True)  # "SMB", "Enterprise"
     website_url = Column(String(500), nullable=True)
     
@@ -61,7 +61,7 @@ class ClientProfile(Base):
     # Timestamps
     created_at = Column(DateTime, default=func.now())
     updated_at = Column(DateTime, default=func.now(), onupdate=func.now())
-    
+
     # Relationships
     user = relationship("User", back_populates="client_profile")
     
@@ -92,3 +92,6 @@ class KnowledgeDocument(Base):
     chunk_count = Column(Integer, default=0)  # Number of text chunks
     
     client_profile = relationship("ClientProfile", back_populates="knowledge_documents")
+
+
+

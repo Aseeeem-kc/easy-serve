@@ -31,7 +31,7 @@ def authenticate_user(db: Session, email: str, password: str):
     return user
 
 
-def get_current_user(db: Session = Depends(get_db), token: str = Depends(oauth2_scheme)):
+def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)):
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",
@@ -39,13 +39,14 @@ def get_current_user(db: Session = Depends(get_db), token: str = Depends(oauth2_
     )
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        username: str = payload.get("sub")
-        if username is None:
+        email: str = payload.get("sub")  # JWT stores EMAIL as "sub"
+        if email is None:
             raise credentials_exception
-        token_data = TokenData(username=username)
     except JWTError:
         raise credentials_exception
-    user = get_user_by_email(db, username=token_data.username)
+    
+    # FIXED: Pass email, NOT username
+    user = get_user_by_email(db, email=email)  # ← CHANGED: email=email
     if user is None:
         raise credentials_exception
     return user
