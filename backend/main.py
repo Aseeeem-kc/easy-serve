@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from auth.routes import router as auth_router
 from user.routes import router as users_router
+from user.routes import router as onboarding_router
 # from notes.routes import router as notes_router
 # from template_prompts.routes import router as template_prompts_router
 

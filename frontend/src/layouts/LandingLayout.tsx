@@ -1,10 +1,11 @@
 import React from "react";
 import Navbar from "../components/common/Navbar";
-import Hero from "../components/sections/Hero";
-import Features from "../components/sections/Features";
-import Pricing from "../components/sections/Pricing";
-import CTA from "../components/sections/CTA";
-import FAQ from "../components/sections/FAQ";
+import Hero from "../components/sections/Landing/Hero";
+import Features from "../components/sections/Landing/Features";
+import Pricing from "../components/sections/Landing/Pricing";
+import CTA from "../components/sections/Landing/CTA";
+import FAQ from "../components/sections/Landing/FAQ";
+import Testimonials from "../components/sections/Landing/Testimonials";
 import Footer from "../components/common/Footer";
 
 const LandingLayout: React.FC = () => {
@@ -16,6 +17,7 @@ const LandingLayout: React.FC = () => {
         <Features />
         <Pricing />
         <FAQ />
+        <Testimonials />
         <CTA />
       </main>
       <Footer />
