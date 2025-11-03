@@ -8,16 +8,23 @@ class User(Base):
     __tablename__ = "users"
 
     id = Column(Integer, primary_key=True, index=True)
-    username = Column(String, unique=True, index=True, nullable=False)
-    company_name = Column(String, unique=True, index=True, nullable=True)
-    location = Column(String, nullable=True)
-    pan_number = Column(String, unique=True, index=True, nullable=True)
-    email = Column(String, unique=True, index=True, nullable=True)
-    phone_number = Column(String, unique=True, index=True, nullable=True)
-    hashed_password = Column(String, nullable=False)
-    is_active = Column(Boolean, default=False)  # inactive until verified
-    email_token = Column(String, nullable=True)  # token for email verification
 
+    # REQUIRED
+    username = Column(String, unique=True, index=True, nullable=False)
+    company_name = Column(String, unique=True, index=True, nullable=False)
+    location = Column(String, nullable=False)
+    email = Column(String, unique=True, index=True, nullable=False)
+    phone_number = Column(String, unique=True, index=True, nullable=False)
+    hashed_password = Column(String, nullable=False)
+
+    # OPTIONAL — ONLY THIS ONE
+    pan_number = Column(String, unique=True, index=True, nullable=True)
+
+    # DEFAULTS
+    is_active = Column(Boolean, default=False)
+    email_token = Column(String, nullable=True)
+
+    # Relationships
     refresh_tokens = relationship(
         "RefreshToken",
         back_populates="user",
@@ -32,7 +39,7 @@ class User(Base):
         cascade="all, delete-orphan",
         lazy="selectin"
     )
-
+    
 class ClientProfile(Base):
     __tablename__ = "client_profiles"
 
