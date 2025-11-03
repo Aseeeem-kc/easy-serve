@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Mail, Lock, AlertCircle, Sparkles, ArrowRight } from "lucide-react";
+import { Link } from "react-router-dom";   
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -52,13 +53,35 @@ const LoginPage: React.FC = () => {
         {/* Card */}
         <div className="bg-white p-8 rounded-2xl shadow-xl border-2 border-gray-200">
           {/* Header */}
+          {/* ← Back to landing page */}
+          <div className="mb-6">
+            <Link
+              to="/"
+              className="inline-flex items-center text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors"
+            >
+              <svg
+                className="w-4 h-4 mr-1"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M15 19l-7-7 7-7"
+                />
+              </svg>
+              Back to Home
+            </Link>
+          </div>
           <div className="text-center mb-8">
             <div className="inline-flex items-center px-4 py-2 rounded-full bg-gradient-to-r from-gray-900 to-gray-700 text-white mb-4 shadow-lg">
               <Sparkles className="w-4 h-4 mr-2" /> 
               <span className="text-sm font-semibold">Welcome Back</span>
             </div>
             <h2 className="text-3xl font-bold text-gray-900 mb-2">Sign In</h2>
-            <p className="text-gray-600">Access your EasyServe dashboard</p>
           </div>
 
           {/* Error Alert */}

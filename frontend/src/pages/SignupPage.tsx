@@ -1,5 +1,6 @@
 import React, { useState } from "react";
-import { Mail, Lock, User, Building2, MapPin, CreditCard, Phone, CheckCircle, AlertCircle, Sparkles } from "lucide-react";
+import { Mail, Lock, User, Building2, MapPin, CreditCard, Phone, CheckCircle, AlertCircle, Sparkles, Home } from "lucide-react";
+import { Link } from "react-router-dom";   
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -18,7 +19,6 @@ const SignupPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
 
-  // Handle input changes
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({
       ...formData,
@@ -26,7 +26,6 @@ const SignupPage: React.FC = () => {
     });
   };
 
-  // Handle form submit
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -66,16 +65,36 @@ const SignupPage: React.FC = () => {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 via-white to-gray-100 px-4 py-12 relative overflow-hidden">
-      {/* Background decoration */}
       <div className="absolute inset-0 opacity-30" style={{
         backgroundImage: `radial-gradient(circle at 2px 2px, rgb(156 163 175 / 0.1) 1px, transparent 0)`,
         backgroundSize: '32px 32px'
       }}></div>
 
       <div className="max-w-md w-full relative">
-        {/* Card */}
         <div className="bg-white p-8 rounded-2xl shadow-xl border-2 border-gray-200">
-          {/* Header */}
+          {/* Back to home button */}
+          <div className="mb-6">
+    <Link
+      to="/"
+      className="inline-flex items-center text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors"
+    >
+      <svg
+        className="w-4 h-4 mr-1"
+        fill="none"
+        stroke="currentColor"
+        viewBox="0 0 24 24"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth={2}
+          d="M15 19l-7-7 7-7"
+        />
+      </svg>
+      Back to Home
+    </Link>
+  </div>
           <div className="text-center mb-8">
             <div className="inline-flex items-center px-4 py-2 rounded-full bg-gradient-to-r from-gray-900 to-gray-700 text-white mb-4 shadow-lg">
               <Sparkles className="w-4 h-4 mr-2" /> 
@@ -85,7 +104,6 @@ const SignupPage: React.FC = () => {
             <p className="text-gray-600">Start your 14-day free trial today</p>
           </div>
 
-          {/* Alerts */}
           {error && (
             <div className="mb-6 p-4 bg-red-50 border-2 border-red-200 rounded-xl flex items-start gap-3">
               <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
@@ -100,9 +118,7 @@ const SignupPage: React.FC = () => {
             </div>
           )}
 
-          {/* Form */}
-          <form onSubmit={handleSubmit} className="space-y-4">
-            {/* Username */}
+          <div className="space-y-4">
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-2">
                 Username <span className="text-red-500">*</span>
@@ -121,11 +137,8 @@ const SignupPage: React.FC = () => {
               </div>
             </div>
 
-            {/* Company Name */}
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
-                Company Name
-              </label>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">Company Name</label>
               <div className="relative">
                 <Building2 className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
                 <input
@@ -139,11 +152,8 @@ const SignupPage: React.FC = () => {
               </div>
             </div>
 
-            {/* Location */}
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
-                Location
-              </label>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">Location</label>
               <div className="relative">
                 <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
                 <input
@@ -157,11 +167,8 @@ const SignupPage: React.FC = () => {
               </div>
             </div>
 
-            {/* PAN Number */}
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
-                PAN Number
-              </label>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">PAN Number</label>
               <div className="relative">
                 <CreditCard className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
                 <input
@@ -175,7 +182,6 @@ const SignupPage: React.FC = () => {
               </div>
             </div>
 
-            {/* Email */}
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-2">
                 Email Address <span className="text-red-500">*</span>
@@ -194,11 +200,8 @@ const SignupPage: React.FC = () => {
               </div>
             </div>
 
-            {/* Phone Number */}
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
-                Phone Number
-              </label>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">Phone Number</label>
               <div className="relative">
                 <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
                 <input
@@ -212,7 +215,6 @@ const SignupPage: React.FC = () => {
               </div>
             </div>
 
-            {/* Password */}
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-2">
                 Password <span className="text-red-500">*</span>
@@ -231,9 +233,8 @@ const SignupPage: React.FC = () => {
               </div>
             </div>
 
-            {/* Submit Button */}
             <button
-              type="submit"
+              onClick={handleSubmit}
               disabled={loading}
               className="w-full bg-gradient-to-r from-gray-900 to-gray-800 text-white py-3.5 rounded-lg hover:from-gray-800 hover:to-gray-700 transition-all font-semibold shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed mt-6"
             >
@@ -249,9 +250,8 @@ const SignupPage: React.FC = () => {
                 "Create Account"
               )}
             </button>
-          </form>
+          </div>
 
-          {/* Footer */}
           <p className="mt-6 text-center text-sm text-gray-600">
             Already have an account?{" "}
             <a href="/signin" className="text-gray-900 font-semibold hover:underline">
@@ -259,7 +259,6 @@ const SignupPage: React.FC = () => {
             </a>
           </p>
 
-          {/* Trust indicators */}
           <div className="mt-6 pt-6 border-t border-gray-200">
             <div className="flex items-center justify-center gap-4 text-xs text-gray-500">
               <span className="flex items-center gap-1">
