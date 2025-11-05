@@ -3,7 +3,7 @@ from typing import Optional
 from datetime import datetime
 from enum import Enum
 
-# === EXISTING SCHEMAS (KEEP AS-IS) ===
+# === EXISTING SCHEMAS ===
 class UserBase(BaseModel):
     username: str
     company_name: str
@@ -42,16 +42,13 @@ class SubscriptionPlan(str, Enum):
     BASIC = "basic"
     PRO = "pro"
 
-# Onboarding Request
-class ClientProfileCreate(BaseModel):
+# SCHEMA 
+class OnboardingProfileCreate(BaseModel):
     industry: str = Field(..., min_length=1, max_length=100)
-    company_size: Optional[CompanySize] = None
+    company_size: Optional[str] = Field(None, max_length=50)  # "SMB", "Enterprise"
     website_url: Optional[HttpUrl] = None
     timezone: str = Field(default="Asia/Kathmandu", max_length=50)
-    language: str = Field(default="en", max_length=10)
-
-class OnboardingComplete(BaseModel):
-    is_onboarded: bool = True
+    language: str = Field(default="en", max_length=10)  # "en", "np"
 
 # Knowledge Document Upload
 class KnowledgeDocumentCreate(BaseModel):

@@ -5,7 +5,7 @@ from auth.dependencies import get_db, get_current_user
 from auth.schemas import MessageResponse
 from user.models import User as UserModel, ClientProfile, KnowledgeDocument
 from user.schemas import (
-    ClientProfileCreate, OnboardingComplete, KnowledgeDocumentCreate,
+    OnboardingProfileCreate, KnowledgeDocumentCreate,
     KnowledgeDocumentResponse, ClientProfileResponse, UserProfileResponse
 )
 from datetime import datetime
@@ -15,44 +15,29 @@ router = APIRouter(prefix="/onboarding", tags=["Onboarding"])
 # -------------------------
 # COMPLETE BUSINESS ONBOARDING
 # -------------------------
-@router.post("/profile", response_model=ClientProfileResponse)
-def complete_onboarding(
-    profile_data: ClientProfileCreate,
+@router.post("/profile", response_model=MessageResponse)
+def create_business_profile(
+    data: OnboardingProfileCreate,
     current_user: UserModel = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
-    # Check if profile already exists
-    existing_profile = db.query(ClientProfile).filter(ClientProfile.user_id == current_user.id).first()
-    if existing_profile:
-        raise HTTPException(status_code=400, detail="Profile already created")
-    
-    # Create profile
+    existing = db.query(ClientProfile).filter(ClientProfile.user_id == current_user.id).first()
+    if existing:
+        raise HTTPException(400, "Profile already exists")
+
     profile = ClientProfile(
         user_id=current_user.id,
-        **profile_data.dict()
+        industry=data.industry,
+        company_size=data.company_size,
+        website_url=str(data.website_url) if data.website_url else None,  # ← str()
+        timezone=data.timezone,
+        language=data.language
     )
     db.add(profile)
     db.commit()
     db.refresh(profile)
-    
-    return profile
 
-# -------------------------
-# MARK ONBOARDING COMPLETE
-# -------------------------
-@router.patch("/complete", response_model=MessageResponse)
-def mark_onboarding_complete(
-    data: OnboardingComplete,
-    current_user: UserModel = Depends(get_current_user),
-    db: Session = Depends(get_db)
-):
-    profile = db.query(ClientProfile).filter(ClientProfile.user_id == current_user.id).first()
-    if not profile:
-        raise HTTPException(status_code=404, detail="Complete profile first")
-    
-    profile.is_onboarded = data.is_onboarded
-    db.commit()
-    return {"message": "Onboarding completed successfully!"}
+    return {"message": "Business profile created successfully!"}
 
 # -------------------------
 # UPLOAD KNOWLEDGE DOCUMENTS (RAG Pipeline)
