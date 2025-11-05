@@ -33,7 +33,7 @@ const LoginPage: React.FC = () => {
       console.log("Login success:", data);
 
       localStorage.setItem("access_token", data.access_token);
-      window.location.href = "/dashboard";
+      window.location.href = "/onboarding";
     } catch (err: any) {
       setError(err.message);
     } finally {
