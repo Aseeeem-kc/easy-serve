@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Building2, Users, Target, Briefcase, CheckCircle, AlertCircle, Sparkles, ArrowRight, Globe, MapPin, Phone, Mail } from "lucide-react";
+import { Building2, Users, Target, Briefcase, CheckCircle, AlertCircle, Sparkles, ArrowRight, Globe, Clock, Languages } from "lucide-react";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -10,15 +10,13 @@ const BusinessOnboarding: React.FC = () => {
   const [success, setSuccess] = useState(false);
 
   const [formData, setFormData] = useState({
-    company_name: "",
     industry: "",
     company_size: "",
-    website: "",
-    address: "",
-    phone: "",
-    contact_email: "",
+    website_url: "",
+    timezone: "",
+    language: "",
+    primary_usecase: "",
     business_goals: "",
-    primary_use_case: "",
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
@@ -49,6 +47,9 @@ const BusinessOnboarding: React.FC = () => {
         throw new Error(err.detail || "Onboarding failed");
       }
 
+      const data = await response.json();
+      console.log("Onboarding success:", data);
+      
       setSuccess(true);
       setTimeout(() => {
         window.location.href = "/dashboard";
@@ -140,24 +141,6 @@ const BusinessOnboarding: React.FC = () => {
 
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  Company Name <span className="text-red-500">*</span>
-                </label>
-                <div className="relative">
-                  <Building2 className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
-                  <input
-                    type="text"
-                    name="company_name"
-                    value={formData.company_name}
-                    onChange={handleChange}
-                    placeholder="Acme Corporation"
-                    className="w-full border-2 border-gray-300 rounded-lg p-3 pl-11 focus:border-gray-900 focus:outline-none transition-colors"
-                    required
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
                   Industry <span className="text-red-500">*</span>
                 </label>
                 <div className="relative">
@@ -177,6 +160,8 @@ const BusinessOnboarding: React.FC = () => {
                     <option value="education">Education</option>
                     <option value="retail">Retail</option>
                     <option value="manufacturing">Manufacturing</option>
+                    <option value="hospitality">Hospitality</option>
+                    <option value="real_estate">Real Estate</option>
                     <option value="other">Other</option>
                   </select>
                 </div>
@@ -200,91 +185,96 @@ const BusinessOnboarding: React.FC = () => {
                     <option value="11-50">11-50 employees</option>
                     <option value="51-200">51-200 employees</option>
                     <option value="201-500">201-500 employees</option>
-                    <option value="501+">501+ employees</option>
+                    <option value="501-1000">501-1000 employees</option>
+                    <option value="1001+">1001+ employees</option>
                   </select>
                 </div>
               </div>
 
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  Website
+                  Website URL <span className="text-red-500">*</span>
                 </label>
                 <div className="relative">
                   <Globe className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
                   <input
                     type="url"
-                    name="website"
-                    value={formData.website}
+                    name="website_url"
+                    value={formData.website_url}
                     onChange={handleChange}
                     placeholder="https://example.com"
                     className="w-full border-2 border-gray-300 rounded-lg p-3 pl-11 focus:border-gray-900 focus:outline-none transition-colors"
+                    required
                   />
                 </div>
               </div>
             </div>
           )}
 
-          {/* Step 2: Contact Details */}
+          {/* Step 2: Preferences */}
           {step === 2 && (
             <div className="space-y-6">
               <div className="flex items-center gap-3 mb-6">
                 <div className="w-12 h-12 bg-gradient-to-br from-gray-900 to-gray-700 rounded-xl flex items-center justify-center">
-                  <Phone className="w-6 h-6 text-white" />
+                  <Clock className="w-6 h-6 text-white" />
                 </div>
                 <div>
-                  <h2 className="text-2xl font-bold text-gray-900">Contact Details</h2>
-                  <p className="text-gray-600">How can we reach you?</p>
+                  <h2 className="text-2xl font-bold text-gray-900">Preferences</h2>
+                  <p className="text-gray-600">Configure your regional settings</p>
                 </div>
               </div>
 
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  Business Address
+                  Timezone <span className="text-red-500">*</span>
                 </label>
                 <div className="relative">
-                  <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
-                  <input
-                    type="text"
-                    name="address"
-                    value={formData.address}
+                  <Clock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                  <select
+                    name="timezone"
+                    value={formData.timezone}
                     onChange={handleChange}
-                    placeholder="123 Main St, City, Country"
-                    className="w-full border-2 border-gray-300 rounded-lg p-3 pl-11 focus:border-gray-900 focus:outline-none transition-colors"
-                  />
+                    className="w-full border-2 border-gray-300 rounded-lg p-3 pl-11 focus:border-gray-900 focus:outline-none transition-colors appearance-none bg-white"
+                    required
+                  >
+                    <option value="">Select your timezone</option>
+                    <option value="Asia/Kathmandu">Asia/Kathmandu (UTC+5:45)</option>
+                    <option value="America/New_York">America/New York (UTC-5)</option>
+                    <option value="America/Los_Angeles">America/Los Angeles (UTC-8)</option>
+                    <option value="Europe/London">Europe/London (UTC+0)</option>
+                    <option value="Europe/Paris">Europe/Paris (UTC+1)</option>
+                    <option value="Asia/Tokyo">Asia/Tokyo (UTC+9)</option>
+                    <option value="Asia/Shanghai">Asia/Shanghai (UTC+8)</option>
+                    <option value="Asia/Dubai">Asia/Dubai (UTC+4)</option>
+                    <option value="Australia/Sydney">Australia/Sydney (UTC+10)</option>
+                  </select>
                 </div>
               </div>
 
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  Phone Number
+                  Language <span className="text-red-500">*</span>
                 </label>
                 <div className="relative">
-                  <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
-                  <input
-                    type="tel"
-                    name="phone"
-                    value={formData.phone}
+                  <Languages className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                  <select
+                    name="language"
+                    value={formData.language}
                     onChange={handleChange}
-                    placeholder="+1 (555) 000-0000"
-                    className="w-full border-2 border-gray-300 rounded-lg p-3 pl-11 focus:border-gray-900 focus:outline-none transition-colors"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  Contact Email
-                </label>
-                <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
-                  <input
-                    type="email"
-                    name="contact_email"
-                    value={formData.contact_email}
-                    onChange={handleChange}
-                    placeholder="contact@company.com"
-                    className="w-full border-2 border-gray-300 rounded-lg p-3 pl-11 focus:border-gray-900 focus:outline-none transition-colors"
-                  />
+                    className="w-full border-2 border-gray-300 rounded-lg p-3 pl-11 focus:border-gray-900 focus:outline-none transition-colors appearance-none bg-white"
+                    required
+                  >
+                    <option value="">Select your language</option>
+                    <option value="en">English</option>
+                    <option value="es">Spanish</option>
+                    <option value="fr">French</option>
+                    <option value="de">German</option>
+                    <option value="zh">Chinese</option>
+                    <option value="ja">Japanese</option>
+                    <option value="ar">Arabic</option>
+                    <option value="hi">Hindi</option>
+                    <option value="pt">Portuguese</option>
+                  </select>
                 </div>
               </div>
             </div>
@@ -308,8 +298,8 @@ const BusinessOnboarding: React.FC = () => {
                   Primary Use Case <span className="text-red-500">*</span>
                 </label>
                 <select
-                  name="primary_use_case"
-                  value={formData.primary_use_case}
+                  name="primary_usecase"
+                  value={formData.primary_usecase}
                   onChange={handleChange}
                   className="w-full border-2 border-gray-300 rounded-lg p-3 focus:border-gray-900 focus:outline-none transition-colors appearance-none bg-white"
                   required
@@ -319,13 +309,15 @@ const BusinessOnboarding: React.FC = () => {
                   <option value="lead_generation">Lead Generation</option>
                   <option value="sales_assistance">Sales Assistance</option>
                   <option value="internal_helpdesk">Internal Helpdesk</option>
+                  <option value="e-commerce_support">E-commerce Support</option>
+                  <option value="booking_reservations">Booking & Reservations</option>
                   <option value="other">Other</option>
                 </select>
               </div>
 
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  Business Goals
+                  Business Goals <span className="text-red-500">*</span>
                 </label>
                 <textarea
                   name="business_goals"
@@ -334,7 +326,9 @@ const BusinessOnboarding: React.FC = () => {
                   placeholder="Tell us about your goals and what you hope to achieve with EasyServe..."
                   rows={5}
                   className="w-full border-2 border-gray-300 rounded-lg p-3 focus:border-gray-900 focus:outline-none transition-colors resize-none"
+                  required
                 ></textarea>
+                <p className="mt-2 text-sm text-gray-500">Share your vision, challenges, and expectations</p>
               </div>
             </div>
           )}

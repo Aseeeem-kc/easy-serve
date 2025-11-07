@@ -47,23 +47,25 @@ class ClientProfile(Base):
     user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), unique=True, nullable=False)
     
     # Business onboarding details
-    industry = Column(String(100), nullable=False)  # "E-commerce", "Healthcare", etc.
-    company_size = Column(String(50), nullable=True)  # "SMB", "Enterprise"
+    industry = Column(String(100), nullable=False)  
+    company_size = Column(String(50), nullable=True) 
     website_url = Column(String(500), nullable=True)
+    primary_usecase = Column(String(500), nullable=True)
+    Business_goals = Column(String(500), nullable=True)
     
     # Basic workflow settings
     timezone = Column(String(50), default="Asia/Kathmandu")
-    language = Column(String(10), default="en")  # "en", "np"
+    language = Column(String(10), default="en") 
     
     # RAG knowledge base tracking
-    knowledge_base_status = Column(String(20), default="pending")  # "pending", "active", "inactive"
+    knowledge_base_status = Column(String(20), default="pending")  
     documents_uploaded_count = Column(Integer, default=0)
     last_kb_update = Column(DateTime, nullable=True)
-    kb_processing_status = Column(String(20), default="idle")  # "processing", "idle", "error"
+    kb_processing_status = Column(String(20), default="idle") 
     
     # Simple subscription
-    subscription_plan = Column(String(50), default="basic")  # "basic", "pro"
-    is_onboarded = Column(Boolean, default=False)  # True after full setup
+    subscription_plan = Column(String(50), default="basic") 
+    is_onboarded = Column(Boolean, default=False) 
     
     # Timestamps
     created_at = Column(DateTime, default=func.now())
@@ -86,8 +88,8 @@ class KnowledgeDocument(Base):
     
     # File info
     file_name = Column(String(255), nullable=False)
-    file_type = Column(String(50), nullable=True)  # "pdf", "docx", "txt", "csv"
-    file_size = Column(Integer, nullable=True)  # bytes
+    file_type = Column(String(50), nullable=True)  
+    file_size = Column(Integer, nullable=True)
     
     # Processing status
     upload_date = Column(DateTime, default=func.now())
@@ -96,7 +98,7 @@ class KnowledgeDocument(Base):
     
     # RAG embeddings info
     embedding_model = Column(String(100), default="minilm")
-    chunk_count = Column(Integer, default=0)  # Number of text chunks
+    chunk_count = Column(Integer, default=0)  
     
     client_profile = relationship("ClientProfile", back_populates="knowledge_documents")
 
