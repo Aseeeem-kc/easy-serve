@@ -31,7 +31,9 @@ def create_business_profile(
         company_size=data.company_size,
         website_url=str(data.website_url) if data.website_url else None,  # ← str()
         timezone=data.timezone,
-        language=data.language
+        language=data.language,
+        primary_usecase=data.primary_usecase,
+        Business_goals=data.business_goals
     )
     db.add(profile)
     db.commit()

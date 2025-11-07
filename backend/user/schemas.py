@@ -43,12 +43,26 @@ class SubscriptionPlan(str, Enum):
     PRO = "pro"
 
 # SCHEMA 
+
 class OnboardingProfileCreate(BaseModel):
     industry: str = Field(..., min_length=1, max_length=100)
     company_size: Optional[str] = Field(None, max_length=50)  # "SMB", "Enterprise"
     website_url: Optional[HttpUrl] = None
     timezone: str = Field(default="Asia/Kathmandu", max_length=50)
     language: str = Field(default="en", max_length=10)  # "en", "np"
+    primary_usecase: Optional[str] = Field(None, max_length=500)
+    business_goals: Optional[str] = Field(None, max_length=500)
+
+class ClientProfileResponse(BaseModel):
+    industry: str
+    company_size: Optional[str]
+    website_url: Optional[str]
+    timezone: str
+    language: str
+    support_hours: Optional[str] = None
+
+    class Config:
+        from_attributes = True
 
 # Knowledge Document Upload
 class KnowledgeDocumentCreate(BaseModel):
