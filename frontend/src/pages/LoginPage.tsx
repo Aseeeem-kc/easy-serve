@@ -37,7 +37,7 @@ const LoginPage: React.FC = () => {
     // Storing access token in memory
     tokenStore.set(data.access_token);
 
-    window.location.href = "/onboarding";
+    window.location.href = "/dashboard";
 
     
 
