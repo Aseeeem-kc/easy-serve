@@ -13,11 +13,8 @@ class Token(BaseModel):
     class Config:
         from_attributes = True
 
-
 class TokenData(BaseModel):
     username: str | None = None
-
-
 
 class RefreshToken(Base):
     __tablename__ = "refresh_tokens"
