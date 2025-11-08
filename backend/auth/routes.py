@@ -15,6 +15,7 @@ from datetime import datetime, timedelta
 from auth.utils import decode_token
 from fastapi.responses import JSONResponse
 from uuid import uuid4
+from fastapi.responses import JSONResponse
 
 
 router = APIRouter()
@@ -73,19 +74,16 @@ def verify_email(token: str, db: Session = Depends(get_db)):
 # -------------------------
 # LOGIN
 # -------------------------
-@router.post("/token", response_model=Token)
+@router.post("/token")
 def login(credentials: LoginSchema, db: Session = Depends(get_db)):
     user = authenticate_user(db, credentials.email, credentials.password)
     if not user:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Incorrect email or password",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
+        raise HTTPException(status_code=401, detail="Incorrect email or password")
 
     access_token = create_access_token(data={"sub": user.email})
     refresh_token, _ = create_refresh_token(data={"sub": user.email})
 
+    # Save refresh token in database
     db_token = RefreshToken(
         token=refresh_token,
         user_id=user.id,
@@ -94,12 +92,19 @@ def login(credentials: LoginSchema, db: Session = Depends(get_db)):
     db.add(db_token)
     db.commit()
 
-    return {
-        "access_token": access_token,
-        "refresh_token": refresh_token,
-        "token_type": "bearer",
-        "username": user.email
-    }
+    # Use json response to set http only cookie for refresh token
+    response = JSONResponse(content={"access_token": access_token, "username": user.email})
+
+    response.set_cookie(
+        key="refresh_token",
+        value=refresh_token,
+        httponly=True,
+        secure=False, #  prod ma true garne
+        samesite="lax",
+        path="/"
+    )
+
+    return response
 
 
 
@@ -107,37 +112,45 @@ def login(credentials: LoginSchema, db: Session = Depends(get_db)):
 # -------------------------
 # REFRESH TOKEN
 # -------------------------
-@router.post("/refresh", response_model=Token)
-def refresh_token(refresh_token: str, db: Session = Depends(get_db)):
-    # Decode refresh token
+@router.post("/refresh")
+def refresh_token(request: Request, db: Session = Depends(get_db)):
+    refresh_token = request.cookies.get("refresh_token")
+    if not refresh_token:
+        raise HTTPException(status_code=401, detail="No refresh token cookie")
+
+    # Decode
     payload = decode_token(refresh_token, refresh=True)
     if not payload:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid refresh token")
+        raise HTTPException(status_code=401, detail="Invalid refresh token")
 
     username = payload.get("sub")
 
-    # Verify token exists in DB and is not revoked/expired
+    # Validate from DB
     db_token = db.query(RefreshToken).filter_by(token=refresh_token, revoked=False).first()
     if not db_token or db_token.expires_at < datetime.utcnow():
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Refresh token not valid")
+        raise HTTPException(status_code=401, detail="Expired or revoked refresh token")
 
     # Issue new access token
     new_access_token = create_access_token(data={"sub": username})
-    return {
-        "access_token": new_access_token,
-        "refresh_token": refresh_token,  # reuse same refresh token
-        "token_type": "bearer",
-        "username": username
-    }
+
+    return {"access_token": new_access_token}
 
 
 # -------------------------
 # LOGOUT
 # -------------------------
 @router.post("/logout")
-def logout(refresh_token: str, db: Session = Depends(get_db)):
-    db_token = db.query(RefreshToken).filter_by(token=refresh_token).first()
-    if db_token:
-        db_token.revoked = True
-        db.commit()
-    return {"msg": "Logged out successfully"}
+def logout(request: Request, db: Session = Depends(get_db)):
+    refresh_token = request.cookies.get("refresh_token")
+    if refresh_token:
+        db_token = db.query(RefreshToken).filter_by(token=refresh_token).first()
+        if db_token:
+            db_token.revoked = True
+            db.commit()
+
+    response = JSONResponse({"message": "Logged out successfully"})
+
+    # Remove cookie
+    response.delete_cookie("refresh_token", path="/api/auth/refresh")
+
+    return response

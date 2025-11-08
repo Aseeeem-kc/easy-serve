@@ -1,8 +1,9 @@
 import React, { useState } from "react";
 import { Mail, Lock, AlertCircle, Sparkles, ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";   
+import { tokenStore } from "../auth/tokenStore";
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+// const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 const LoginPage: React.FC = () => {
   const [email, setEmail] = useState("");
@@ -11,35 +12,41 @@ const LoginPage: React.FC = () => {
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    setError("");
+  e.preventDefault();
+  setLoading(true);
+  setError("");
 
-    try {
-      const res = await fetch(`${API_BASE_URL}/api/auth/token`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ email, password }),
-      });
+  try {
+    const res = await fetch(`/api/auth/token`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ email, password }),
+      credentials: "include", 
+    });
 
-      if (!res.ok) {
-        const err = await res.json();
-        throw new Error(err.detail || "Login failed");
-      }
-
-      const data = await res.json();
-      console.log("Login success:", data);
-
-      localStorage.setItem("access_token", data.access_token);
-      window.location.href = "/onboarding";
-    } catch (err: any) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
+    if (!res.ok) {
+      const err = await res.json();
+      throw new Error(err.detail || "Login failed");
     }
-  };
+
+    const data = await res.json();
+    console.log("Login response JSON:", data);
+
+    // Storing access token in memory
+    tokenStore.set(data.access_token);
+
+    window.location.href = "/onboarding";
+
+    
+
+  } catch (err: any) {
+    setError(err.message);
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 via-white to-gray-100 px-4 py-12 relative overflow-hidden">

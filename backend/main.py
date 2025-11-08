@@ -3,8 +3,6 @@ from fastapi.middleware.cors import CORSMiddleware
 from auth.routes import router as auth_router
 from user.routes import router as users_router
 from user.routes import router as onboarding_router
-# from notes.routes import router as notes_router
-# from template_prompts.routes import router as template_prompts_router
 
 app = FastAPI()
 
@@ -17,10 +15,11 @@ origins = [
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
+    allow_origins=["http://localhost:5173"],
     allow_credentials=True,
-    allow_methods=["*"],        # Allows all methods
-    allow_headers=["*"],        # Allows all headers
+    allow_methods=["*"],        
+    allow_headers=["*"],        
+
 )
 
 app.include_router(auth_router, prefix="/api/auth", tags=["auth"])
