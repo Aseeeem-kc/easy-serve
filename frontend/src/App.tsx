@@ -3,6 +3,7 @@ import LandingPage from "./pages/LandingPage";
 import SignupPage from "./pages/SignupPage";
 import LoginPage from "./pages/LoginPage";
 import BusinessOnboarding from "./pages/WelcomePage";
+import DashBoard from "./pages/core/DashBoard";
 
 function App() {
   return (
@@ -12,6 +13,8 @@ function App() {
         <Route path="/signup" element={<SignupPage />} />
         <Route path="/signin" element={<LoginPage />} />
         <Route path="/onboarding" element={<BusinessOnboarding />} />
+
+        <Route path="/dashboard" element={<DashBoard />} />
       </Routes>
     </Router>
   );
