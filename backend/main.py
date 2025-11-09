@@ -4,7 +4,7 @@ from auth.routes import router as auth_router
 from user.routes import router as users_router
 from user.routes import router as onboarding_router
 from core.dashboard.routes import router as dashboard_router
-from core.dashboard.profile.routes import router as profile_router
+from core.profile.routes import router as profile_router
 
 app = FastAPI()
 

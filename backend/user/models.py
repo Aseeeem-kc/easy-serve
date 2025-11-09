@@ -51,7 +51,7 @@ class ClientProfile(Base):
     company_size = Column(String(50), nullable=True) 
     website_url = Column(String(500), nullable=True)
     primary_usecase = Column(String(500), nullable=True)
-    Business_goals = Column(String(500), nullable=True)
+    business_goals = Column(String(500), nullable=True)
     
     # Basic workflow settings
     timezone = Column(String(50), default="Asia/Kathmandu")
