@@ -16,6 +16,7 @@ from auth.utils import decode_token
 from fastapi.responses import JSONResponse
 from uuid import uuid4
 from fastapi.responses import JSONResponse
+from user.models import ClientProfile
 
 
 router = APIRouter()
@@ -26,14 +27,13 @@ router = APIRouter()
 # ------------------------- 
 @router.post("/signup", response_model=MessageResponse)
 def signup(user: UserCreate, request: Request, db: Session = Depends(get_db)):
-    # Check existing email
-    db_user = get_user_by_email(db, email=user.email)
-    if db_user:
-        raise HTTPException(status_code=400, detail="Email already registered")
+    if db.query(UserModel).filter(UserModel.email == user.email).first():
+        raise HTTPException(400, "Email already registered")
 
     hashed_password = get_password_hash(user.password)
     token = str(uuid4())
 
+    # 1. Create User
     new_user = UserModel(
         username=user.username,
         company_name=user.company_name,
@@ -49,11 +49,19 @@ def signup(user: UserCreate, request: Request, db: Session = Depends(get_db)):
     db.commit()
     db.refresh(new_user)
 
-    # Construct email verification URL
+    # 2. Create minimal ClientProfile (only required fields)
+    profile = ClientProfile(
+        user_id=new_user.id,
+        industry="Unknown"  
+    )
+    db.add(profile)
+    db.commit()
+
+    # 3. Send email
     verify_url = f"{request.base_url}api/auth/verify/{token}"
     send_verification_email(user.email, verify_url)
 
-    return {"message": "Signup successful! Please check your email to verify your account."}
+    return {"message": "Signup successful! Please verify your email."}
 
 # -------------------------
 # EMAIL VERIFICATION
