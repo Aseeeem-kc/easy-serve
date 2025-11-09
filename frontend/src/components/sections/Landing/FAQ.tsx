@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { ChevronDown, HelpCircle, Sparkles } from "lucide-react";
+import { ChevronDown, HelpCircle } from "lucide-react";
 
 const FAQ: React.FC = () => {
   const [openIndex, setOpenIndex] = useState<number | null>(0);
@@ -107,7 +107,7 @@ const FAQ: React.FC = () => {
 
         {/* Bottom CTA */}
         <div className="mt-16 text-center bg-gradient-to-br from-gray-900 to-gray-700 rounded-3xl p-12 shadow-2xl">
-          <Sparkles className="w-12 h-12 text-white mx-auto mb-4" />
+          
           <h3 className="text-3xl font-bold text-white mb-4">
             Still have questions?
           </h3>

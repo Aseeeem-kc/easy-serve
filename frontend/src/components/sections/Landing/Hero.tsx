@@ -1,5 +1,5 @@
 import React from "react";
-import { ArrowRight, Sparkles, CheckCircle, Users, Zap, Clock } from "lucide-react";
+import { ArrowRight, CheckCircle, Users, Zap, Clock } from "lucide-react";
 
 const Hero: React.FC = () => {
   return (
@@ -16,7 +16,7 @@ const Hero: React.FC = () => {
           {/* Left */}
           <div className="space-y-8">
             <div className="inline-flex items-center px-4 py-2 rounded-full bg-gradient-to-r from-gray-900 to-gray-700 text-white shadow-lg">
-              <Sparkles className="w-4 h-4 mr-2" /> 
+               
               <span className="text-sm font-semibold">AI-Powered Solution</span>
             </div>
 

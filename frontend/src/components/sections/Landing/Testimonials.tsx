@@ -1,5 +1,5 @@
 import React from "react";
-import { Star, Quote, Sparkles } from "lucide-react";
+import { Star, Quote } from "lucide-react";
 
 const Testimonials: React.FC = () => {
   const testimonials = [
@@ -42,7 +42,7 @@ const Testimonials: React.FC = () => {
         {/* Header */}
         <div className="text-center mb-16">
           <div className="inline-flex items-center px-4 py-2 rounded-full bg-gradient-to-r from-gray-900 to-gray-700 text-white mb-6 shadow-lg">
-            <Sparkles className="w-4 h-4 mr-2" /> 
+            
             <span className="text-sm font-semibold">Trusted by Teams</span>
           </div>
           
