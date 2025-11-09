@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { LayoutDashboard, Ticket, BarChart3, Settings, Bell, User, MessageSquare, TrendingUp, Clock, Star, Eye, MoreVertical, HelpCircle, AlertCircle, LogOut } from "lucide-react";
 import { tokenStore } from "../../auth/tokenStore";
-
+import { Link } from "react-router-dom";
 
 // const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -298,11 +298,13 @@ const SupportDashboard: React.FC = () => {
               <button className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
                 <Bell className="w-5 h-5 text-gray-600" />
               </button>
-              <button className="flex items-center space-x-2 p-2 hover:bg-gray-100 rounded-lg transition-colors">
-                <div className="w-8 h-8 bg-gradient-to-br from-gray-900 to-gray-700 rounded-full flex items-center justify-center">
-                  <User className="w-4 h-4 text-white" />
-                </div>
-              </button>
+             <Link to="/profile">
+  <button className="flex items-center space-x-2 p-2 hover:bg-gray-100 rounded-lg transition-colors">
+    <div className="w-8 h-8 bg-gradient-to-br from-gray-900 to-gray-700 rounded-full flex items-center justify-center">
+      <User className="w-4 h-4 text-white" />
+    </div>
+  </button>
+</Link>
             </div>
           </div>
         </header>

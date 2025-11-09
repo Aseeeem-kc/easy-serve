@@ -1,5 +1,5 @@
 import React from "react";
-import { Bot, LineChart, MessagesSquare, Shield, ArrowRight, Sparkles } from "lucide-react";
+import { Bot, LineChart, MessagesSquare, Shield, ArrowRight } from "lucide-react";
 
 const Features: React.FC = () => {
   const features = [
@@ -45,7 +45,7 @@ const Features: React.FC = () => {
         {/* Header */}
         <div className="text-center mb-16">
           <div className="inline-flex items-center px-4 py-2 rounded-full bg-gradient-to-r from-gray-900 to-gray-700 text-white mb-6 shadow-lg">
-            <Sparkles className="w-4 h-4 mr-2" /> 
+            
             <span className="text-sm font-semibold">Feature-Rich Platform</span>
           </div>
           

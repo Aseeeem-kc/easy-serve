@@ -1,5 +1,5 @@
 import React from "react";
-import { ArrowRight, Zap, Shield, Users, Sparkles } from "lucide-react";
+import { ArrowRight, Zap, Shield, Users } from "lucide-react";
 
 const CTA: React.FC = () => {
   return (
@@ -23,7 +23,7 @@ const CTA: React.FC = () => {
         {/* Main content */}
         <div className="text-center mb-12">
           <div className="inline-flex items-center px-4 py-2 rounded-full bg-white/10 backdrop-blur-sm text-white border border-white/20 mb-6 shadow-lg">
-            <Sparkles className="w-4 h-4 mr-2" /> 
+            
             <span className="text-sm font-semibold">Start Your Journey Today</span>
           </div>
 

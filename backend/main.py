@@ -4,6 +4,8 @@ from auth.routes import router as auth_router
 from user.routes import router as users_router
 from user.routes import router as onboarding_router
 from core.dashboard.routes import router as dashboard_router
+from core.dashboard.profile.routes import router as profile_router
+
 app = FastAPI()
 
 # Configure CORS
@@ -25,6 +27,7 @@ app.add_middleware(
 app.include_router(auth_router, prefix="/api/auth", tags=["auth"])
 app.include_router(users_router, prefix="/api/users", tags=["users"])
 app.include_router(dashboard_router, prefix="/api/dashbord", tags=["dashboard"])
+app.include_router(profile_router, prefix="/api/profile", tags=["profile"])
 
 @app.get("/")
 def read_root():
