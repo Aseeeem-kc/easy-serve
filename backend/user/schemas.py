@@ -64,6 +64,22 @@ class ClientProfileResponse(BaseModel):
     class Config:
         from_attributes = True
 
+
+# Schemas for updating client profile
+class ClientProfileUpdate(BaseModel):
+    industry: Optional[str] = Field(None, min_length=1, max_length=100)
+    company_size: Optional[str] = Field(None, max_length=50)
+    website_url: Optional[HttpUrl] = None
+    primary_usecase: Optional[str] = Field(None, max_length=500)
+    business_goals: Optional[str] = Field(None, max_length=500)
+    timezone: Optional[str] = Field(None, max_length=50)
+    language: Optional[str] = Field(None, max_length=10)
+    subscription_plan: Optional[str] = Field(None, max_length=50)
+
+    class Config:
+        from_attributes = True
+
+
 # Knowledge Document Upload
 class KnowledgeDocumentCreate(BaseModel):
     file_name: str = Field(..., max_length=255)
@@ -79,7 +95,6 @@ class KnowledgeDocumentResponse(BaseModel):
     processing_error: Optional[str]
     upload_date: datetime
     chunk_count: int
-    
     model_config = ConfigDict(from_attributes=True)
 
 # Profile Response
@@ -97,7 +112,8 @@ class ClientProfileResponse(BaseModel):
     is_onboarded: bool
     created_at: datetime
     updated_at: datetime
-    
+    primary_usecase: Optional[str]
+    business_goals: Optional[str]
     model_config = ConfigDict(from_attributes=True)
 
 # Full User + Profile Response
