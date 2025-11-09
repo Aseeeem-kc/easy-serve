@@ -90,7 +90,7 @@ const Pricing: React.FC = () => {
         {/* Pricing Cards */}
         <div className="grid md:grid-cols-3 gap-8 mb-12">
           {plans.map((plan, index) => {
-            const Icon = plan.icon;
+            
             return (
               <div 
                 key={index}

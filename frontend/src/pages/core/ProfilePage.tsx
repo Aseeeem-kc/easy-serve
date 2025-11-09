@@ -1,7 +1,6 @@
 import React, { useState, useEffect, type JSX } from "react";
-import { User, Building2, Globe, Settings, Clock, Languages, FileText, CheckCircle, AlertCircle, Crown, Calendar, Sparkles, Edit2, Save, X, FerrisWheel } from "lucide-react";
+import { User, Building2, Globe, Settings, Clock, Languages, FileText, CheckCircle, AlertCircle, Crown, Calendar, Sparkles, Edit2, Save, X, Target } from "lucide-react";
 import { tokenStore } from "../../auth/tokenStore";
-// const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 interface ProfileData {
   id: number;
@@ -17,65 +16,174 @@ interface ProfileData {
   is_onboarded: boolean;
   created_at: string;
   updated_at: string;
+  primary_usecase: string;
+  business_goals: string;
 }
+
+interface EditableFields {
+  industry: string;
+  company_size: string;
+  website_url: string;
+  primary_usecase: string;
+  business_goals: string;
+  timezone: string;
+  language: string;
+}
+
 
 const ProfilePage: React.FC = () => {
   const [profile, setProfile] = useState<ProfileData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isEditing, setIsEditing] = useState(false);
-  const [editedData, setEditedData] = useState<Partial<ProfileData>>({});
+  const [editedData, setEditedData] = useState<EditableFields>({
+    industry: "",
+    company_size: "",
+    website_url: "",
+    primary_usecase: "",
+    business_goals: "",
+    timezone: "",
+    language: ""
+  });
+  const [saving, setSaving] = useState(false);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   useEffect(() => {
     fetchProfileData();
   }, []);
 
+
   const fetchProfileData = async () => {
-  try {
-    let accessToken = tokenStore.get();
+    try {
+      let accessToken = tokenStore.get();
 
-    if (!accessToken) {
-      const refreshRes = await fetch(`/api/auth/refresh`, { method: "POST", credentials: "include" });
-      if (refreshRes.ok) {
-        const refreshData = await refreshRes.json();
-        tokenStore.set(refreshData.access_token);
-        accessToken = refreshData.access_token;
-        console.log("Token refreshed successfully");
-        console.log("New Access Token:", accessToken);
-      } else {
-        window.location.href = "/signin";
-        return;
+      if (!accessToken) {
+        const refreshRes = await fetch(`/api/auth/refresh`, { method: "POST", credentials: "include" });
+        if (refreshRes.ok) {
+          const refreshData = await refreshRes.json();
+          tokenStore.set(refreshData.access_token);
+          accessToken = refreshData.access_token;
+        } else {
+          window.location.href = "/signin";
+          return;
+        }
       }
+
+      const res = await fetch(`/api/profile/profile`, {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+        credentials: "include",
+      });
+
+      if (res.status === 401) {
+        tokenStore.clear();
+        return fetchProfileData();
+      }
+
+      if (!res.ok) throw new Error("Failed to load profile data");
+
+      const result = await res.json();
+      setProfile(result);
+      setEditedData({
+        industry: result.industry || "",
+        company_size: result.company_size || "",
+        website_url: result.website_url || "",
+        primary_usecase: result.primary_usecase || "",
+        business_goals: result.business_goals || "",
+        timezone: result.timezone || "",
+        language: result.language || "",
+      });
+      setError(null);
+    } catch (err: any) {
+      console.error("Profile fetch error:", err.message);
+      setError(err.message);
+    } finally {
+      setLoading(false);
     }
-
-    const res = await fetch(`/api/profile/profile`, {
-      method: "GET",
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-      },
-      credentials: "include",
-    });
-
-    console.log("Profile fetch response status:", res);
-
-    if (res.status === 401) {
-      // Retry once
-      tokenStore.clear();
-      return fetchProfileData();
+  };
+ 
+    
+  const handleEditToggle = () => {
+    if (isEditing && profile) {
+      // Cancel editing - restore original values
+      setEditedData({
+        industry: profile.industry || "",
+        company_size: profile.company_size || "",
+        website_url: profile.website_url || "",
+        primary_usecase: profile.primary_usecase || "",
+        business_goals: profile.business_goals || "",
+        timezone: profile.timezone || "",
+        language: profile.language || ""
+      });
     }
+    
+    setIsEditing(!isEditing);
+    setSuccessMessage(null);
+  };
 
-    if (!res.ok) throw new Error("Failed to load profile data");
+  const handleInputChange = (field: keyof EditableFields, value: string) => {
+    setEditedData(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
 
-    const result = await res.json();
-    setLoading(false);
-    setProfile(result);
+  const handleSaveProfile = async () => {
+    setSaving(true);
     setError(null);
-    console.log(result); 
-  } catch (err: any) {
-    console.error("Profile fetch error:", err.message);
-  }
-};
+    setSuccessMessage(null);
 
+    try {
+      let accessToken = tokenStore.get();
+
+      if (!accessToken) {
+        const refreshRes = await fetch(`/api/auth/refresh`, { method: "POST", credentials: "include" });
+        if (refreshRes.ok) {
+          const refreshData = await refreshRes.json();
+          tokenStore.set(refreshData.access_token);
+          accessToken = refreshData.access_token;
+        } else {
+          window.location.href = "/signin";
+          return;
+        }
+      }
+
+      const res = await fetch(`/api/profile/edit`, {
+        method: "PATCH",
+        headers: {
+          "Authorization": `Bearer ${accessToken}`,
+          "Content-Type": "application/json"
+        },
+        credentials: "include",
+        body: JSON.stringify(editedData)
+      });
+
+      if (res.status === 401) {
+        tokenStore.clear();
+        return handleSaveProfile();
+      }
+
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.detail || "Failed to update profile");
+      }
+
+
+      const updatedProfile = await res.json();
+      setProfile(updatedProfile);
+      setIsEditing(false);
+      setSuccessMessage("Profile updated successfully!");
+      
+      setTimeout(() => setSuccessMessage(null), 3000);
+    } catch (err: any) {
+      console.error("Profile update error:", err.message);
+      setError(err.message);
+    } finally {
+      setSaving(false);
+    }
+  };
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {
@@ -84,6 +192,9 @@ const ProfilePage: React.FC = () => {
       day: 'numeric'
     });
   };
+  console.log(profile?.company_size);
+  console.log(profile?.primary_usecase);
+
 
   const getStatusBadge = (status: string) => {
     const statusMap: Record<string, { color: string; text: string }> = {
@@ -129,13 +240,13 @@ const ProfilePage: React.FC = () => {
     );
   }
 
-  if (error || !profile) {
+  if (error && !profile) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="text-center">
           <AlertCircle className="w-16 h-16 text-red-500 mx-auto mb-4" />
           <h2 className="text-2xl font-bold text-gray-900 mb-2">Error Loading Profile</h2>
-          <p className="text-gray-600 mb-4">{error || "Failed to load profile"}</p>
+          <p className="text-gray-600 mb-4">{error}</p>
           <button
             onClick={fetchProfileData}
             className="px-6 py-3 bg-gradient-to-r from-gray-900 to-gray-800 text-white rounded-lg font-semibold hover:from-gray-800 hover:to-gray-700 transition-all"
@@ -146,6 +257,8 @@ const ProfilePage: React.FC = () => {
       </div>
     );
   }
+
+  if (!profile) return null;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100 py-12 px-4">
@@ -170,6 +283,22 @@ const ProfilePage: React.FC = () => {
             </button>
           </div>
         </div>
+
+        {/* Success Message */}
+        {successMessage && (
+          <div className="mb-6 p-4 bg-green-50 border-2 border-green-200 rounded-xl flex items-start gap-3">
+            <CheckCircle className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
+            <p className="text-green-700 font-semibold">{successMessage}</p>
+          </div>
+        )}
+
+        {/* Error Message */}
+        {error && (
+          <div className="mb-6 p-4 bg-red-50 border-2 border-red-200 rounded-xl flex items-start gap-3">
+            <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
+            <p className="text-red-700 font-semibold">{error}</p>
+          </div>
+        )}
 
         {/* Profile Card */}
         <div className="bg-white rounded-2xl border-2 border-gray-200 shadow-xl overflow-hidden mb-6">
@@ -215,58 +344,177 @@ const ProfilePage: React.FC = () => {
                   <Building2 className="w-6 h-6 text-gray-700" />
                   Company Information
                 </h3>
-                <button
-                  onClick={() => setIsEditing(!isEditing)}
-                  className="text-sm text-gray-600 hover:text-gray-900 font-medium flex items-center gap-2"
-                >
-                  {isEditing ? (
-                    <>
+                {!isEditing ? (
+                  <button
+                    onClick={handleEditToggle}
+                    className="text-sm text-gray-600 hover:text-gray-900 font-medium flex items-center gap-2"
+                  >
+                    <Edit2 className="w-4 h-4" />
+                    Edit Profile
+                  </button>
+                ) : (
+                  <div className="flex gap-2">
+                    <button
+                      onClick={handleSaveProfile}
+                      disabled={saving}
+                      className="text-sm bg-gradient-to-r from-gray-900 to-gray-800 text-white px-4 py-2 rounded-lg font-medium flex items-center gap-2 hover:from-gray-800 hover:to-gray-700 transition-all disabled:opacity-50"
+                    >
+                      <Save className="w-4 h-4" />
+                      {saving ? "Saving..." : "Save Changes"}
+                    </button>
+                    <button
+                      onClick={handleEditToggle}
+                      disabled={saving}
+                      className="text-sm text-gray-600 hover:text-gray-900 font-medium flex items-center gap-2"
+                    >
                       <X className="w-4 h-4" />
                       Cancel
-                    </>
-                  ) : (
-                    <>
-                      <Edit2 className="w-4 h-4" />
-                      Edit
-                    </>
-                  )}
-                </button>
+                    </button>
+                  </div>
+                )}
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Industry */}
                 <div className="bg-gray-50 rounded-xl p-4 border border-gray-200">
                   <div className="flex items-center gap-3 mb-2">
                     <Building2 className="w-5 h-5 text-gray-600" />
                     <span className="text-sm font-semibold text-gray-700">Industry</span>
                   </div>
-                  <p className="text-lg font-medium text-gray-900 capitalize ml-8">
-                    {profile.industry}
-                  </p>
+                  {isEditing ? (
+                    <select
+                      value={editedData.industry}
+                      onChange={(e) => handleInputChange('industry', e.target.value)}
+                      className="w-full ml-8 border-2 border-gray-300 rounded-lg p-2 focus:border-gray-900 focus:outline-none"
+                    >
+                      <option value="technology">Technology</option>
+                      <option value="ecommerce">E-commerce</option>
+                      <option value="healthcare">Healthcare</option>
+                      <option value="finance">Finance</option>
+                      <option value="education">Education</option>
+                      <option value="retail">Retail</option>
+                      <option value="manufacturing">Manufacturing</option>
+                      <option value="hospitality">Hospitality</option>
+                      <option value="real_estate">Real Estate</option>
+                      <option value="other">Other</option>
+                    </select>
+                  ) : (
+                    <p className="text-lg font-medium text-gray-900 capitalize ml-8">
+                      {profile.industry}
+                    </p>
+                  )}
                 </div>
 
+                {/* Company Size */}
                 <div className="bg-gray-50 rounded-xl p-4 border border-gray-200">
                   <div className="flex items-center gap-3 mb-2">
                     <User className="w-5 h-5 text-gray-600" />
                     <span className="text-sm font-semibold text-gray-700">Company Size</span>
                   </div>
-                  <p className="text-lg font-medium text-gray-900 ml-8">
-                    {profile.company_size} employees
-                  </p>
+                  {isEditing ? (
+                    <select
+                      value={editedData.company_size}
+                      onChange={(e) => handleInputChange('company_size', e.target.value)}
+                      className="w-full ml-8 border-2 border-gray-300 rounded-lg p-2 focus:border-gray-900 focus:outline-none"
+                    >
+                      <option value="1-10">1-10 employees</option>
+                      <option value="11-50">11-50 employees</option>
+                      <option value="51-200">51-200 employees</option>
+                      <option value="201-500">201-500 employees</option>
+                      <option value="501-1000">501-1000 employees</option>
+                      <option value="1001+">1001+ employees</option>
+                    </select>
+                  ) : (
+                    <p className="text-lg font-medium text-gray-900 ml-8">
+                      {profile.company_size} employees
+                    </p>
+                  )}
                 </div>
 
+                {/* Website */}
                 <div className="bg-gray-50 rounded-xl p-4 border border-gray-200 md:col-span-2">
                   <div className="flex items-center gap-3 mb-2">
                     <Globe className="w-5 h-5 text-gray-600" />
                     <span className="text-sm font-semibold text-gray-700">Website</span>
                   </div>
-                  <a 
-                    href={profile.website_url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-lg font-medium text-blue-600 hover:text-blue-700 ml-8 break-all"
-                  >
-                    {profile.website_url}
-                  </a>
+                  {isEditing ? (
+                    <input
+                      type="url"
+                      value={editedData.website_url}
+                      onChange={(e) => handleInputChange('website_url', e.target.value)}
+                      placeholder="https://example.com"
+                      className="w-full ml-8 border-2 border-gray-300 rounded-lg p-2 focus:border-gray-900 focus:outline-none"
+                    />
+                  ) : (
+                    <a 
+                      href={profile.website_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-lg font-medium text-blue-600 hover:text-blue-700 ml-8 break-all"
+                    >
+                      {profile.website_url}
+                    </a>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Business Goals */}
+            <div className="mb-8">
+              <h3 className="text-xl font-bold text-gray-900 flex items-center gap-2 mb-4">
+                <Target className="w-6 h-6 text-gray-700" />
+                Business Information
+              </h3>
+
+              <div className="grid grid-cols-1 gap-6">
+                {/* Primary Use Case */}
+                <div className="bg-gray-50 rounded-xl p-4 border border-gray-200">
+                  <div className="flex items-center gap-3 mb-2">
+                    <Target className="w-5 h-5 text-gray-600" />
+                    <span className="text-sm font-semibold text-gray-700">Primary Use Case</span>
+                  </div>
+                  {isEditing ? (
+                    <select
+                      value={editedData.primary_usecase}
+                      onChange={(e) => handleInputChange('primary_usecase', e.target.value)}
+                      className="w-full ml-8 border-2 border-gray-300 rounded-lg p-2 focus:border-gray-900 focus:outline-none"
+                    >
+                      <option value="">Select primary use case</option>
+                      <option value="customer_support">Customer Support Automation</option>
+                      <option value="lead_generation">Lead Generation</option>
+                      <option value="sales_assistance">Sales Assistance</option>
+                      <option value="internal_helpdesk">Internal Helpdesk</option>
+                      <option value="e-commerce_support">E-commerce Support</option>
+                      <option value="booking_reservations">Booking & Reservations</option>
+                      <option value="other">Other</option>
+                    </select>
+                  ) : (
+                    <p className="text-lg font-medium text-gray-900 capitalize ml-8">
+                      {profile.primary_usecase?.replace(/_/g, ' ') || 'Not specified'}
+                    </p>
+                  )}
+                </div>
+
+
+                {/* Business Goals */}
+                <div className="bg-gray-50 rounded-xl p-4 border border-gray-200">
+                  <div className="flex items-center gap-3 mb-2">
+                    <FileText className="w-5 h-5 text-gray-600" />
+                    <span className="text-sm font-semibold text-gray-700">Business Goals</span>
+                  </div>
+                  {isEditing ? (
+                    <textarea
+                      value={editedData.business_goals}
+                      onChange={(e) => handleInputChange('business_goals', e.target.value)}
+                      placeholder="Describe your business goals..."
+                      rows={4}
+                      className="w-full ml-8 border-2 border-gray-300 rounded-lg p-2 focus:border-gray-900 focus:outline-none resize-none"
+                    />
+                  ) : (
+                    <p className="text-lg font-medium text-gray-900 ml-8">
+                      {profile.business_goals || 'Not specified'}
+                    </p>
+                  )}
                 </div>
               </div>
             </div>
@@ -279,24 +527,62 @@ const ProfilePage: React.FC = () => {
               </h3>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Timezone */}
                 <div className="bg-gray-50 rounded-xl p-4 border border-gray-200">
                   <div className="flex items-center gap-3 mb-2">
                     <Clock className="w-5 h-5 text-gray-600" />
                     <span className="text-sm font-semibold text-gray-700">Timezone</span>
                   </div>
-                  <p className="text-lg font-medium text-gray-900 ml-8">
-                    {profile.timezone}
-                  </p>
+                  {isEditing ? (
+                    <select
+                      value={editedData.timezone}
+                      onChange={(e) => handleInputChange('timezone', e.target.value)}
+                      className="w-full ml-8 border-2 border-gray-300 rounded-lg p-2 focus:border-gray-900 focus:outline-none"
+                    >
+                      <option value="Asia/Kathmandu">Asia/Kathmandu (UTC+5:45)</option>
+                      <option value="America/New_York">America/New York (UTC-5)</option>
+                      <option value="America/Los_Angeles">America/Los Angeles (UTC-8)</option>
+                      <option value="Europe/London">Europe/London (UTC+0)</option>
+                      <option value="Europe/Paris">Europe/Paris (UTC+1)</option>
+                      <option value="Asia/Tokyo">Asia/Tokyo (UTC+9)</option>
+                      <option value="Asia/Shanghai">Asia/Shanghai (UTC+8)</option>
+                      <option value="Asia/Dubai">Asia/Dubai (UTC+4)</option>
+                      <option value="Australia/Sydney">Australia/Sydney (UTC+10)</option>
+                    </select>
+                  ) : (
+                    <p className="text-lg font-medium text-gray-900 ml-8">
+                      {profile.timezone}
+                    </p>
+                  )}
                 </div>
 
+                {/* Language */}
                 <div className="bg-gray-50 rounded-xl p-4 border border-gray-200">
                   <div className="flex items-center gap-3 mb-2">
                     <Languages className="w-5 h-5 text-gray-600" />
                     <span className="text-sm font-semibold text-gray-700">Language</span>
                   </div>
-                  <p className="text-lg font-medium text-gray-900 ml-8 uppercase">
-                    {profile.language}
-                  </p>
+                  {isEditing ? (
+                    <select
+                      value={editedData.language}
+                      onChange={(e) => handleInputChange('language', e.target.value)}
+                      className="w-full ml-8 border-2 border-gray-300 rounded-lg p-2 focus:border-gray-900 focus:outline-none"
+                    >
+                      <option value="en">English</option>
+                      <option value="es">Spanish</option>
+                      <option value="fr">French</option>
+                      <option value="de">German</option>
+                      <option value="zh">Chinese</option>
+                      <option value="ja">Japanese</option>
+                      <option value="ar">Arabic</option>
+                      <option value="hi">Hindi</option>
+                      <option value="pt">Portuguese</option>
+                    </select>
+                  ) : (
+                    <p className="text-lg font-medium text-gray-900 ml-8 uppercase">
+                      {profile.language}
+                    </p>
+                  )}
                 </div>
               </div>
             </div>
@@ -406,16 +692,10 @@ const ProfilePage: React.FC = () => {
         {/* Action Buttons */}
         <div className="flex gap-4">
           <button
-            onClick={() => window.location.href = "/onboarding"}
-            className="flex-1 px-6 py-4 bg-gradient-to-r from-gray-900 to-gray-800 text-white rounded-xl font-semibold hover:from-gray-800 hover:to-gray-700 transition-all shadow-lg hover:shadow-xl"
-          >
-            Update Profile
-          </button>
-          <button
             onClick={fetchProfileData}
             className="px-6 py-4 border-2 border-gray-300 text-gray-700 rounded-xl font-semibold hover:bg-gray-50 transition-all"
           >
-            Refresh
+            Refresh Data
           </button>
         </div>
       </div>
