@@ -18,7 +18,7 @@ class User(Base):
     hashed_password = Column(String, nullable=False)
 
     # OPTIONAL — ONLY THIS ONE
-    pan_number = Column(String, unique=True, index=True, nullable=True)
+    pan_number = Column(String, index=True, nullable=True)
 
     # DEFAULTS
     is_active = Column(Boolean, default=False)
