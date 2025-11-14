@@ -3,7 +3,7 @@ from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 from auth.dependencies import get_db, authenticate_user, get_user_by_email
 from auth.models import TokenData, Token
-from auth.schemas import UserCreate, UserResponse, LoginSchema, MessageResponse,  ResetPasswordSchema
+from auth.schemas import UserCreate, UserResponse, LoginSchema, MessageResponse,  ResetPasswordSchema, ForgotPasswordSchema
 from user.models import User as UserModel
 from auth.utils import (
     get_password_hash, verify_password,
@@ -17,7 +17,7 @@ from fastapi.responses import JSONResponse
 from uuid import uuid4
 from fastapi.responses import JSONResponse
 from user.models import ClientProfile
-
+from fastapi import Request
 
 router = APIRouter()
 
@@ -167,22 +167,29 @@ def logout(request: Request, db: Session = Depends(get_db)):
 # -------------------------
 # FORGOT PASSWORD
 # -------------------------
+from auth.schemas import ForgotPasswordSchema
+from fastapi import Body
+
 @router.post("/forgot-password", response_model=MessageResponse)
-def forgot_password(request: Request, email: str, db: Session = Depends(get_db)):
+def forgot_password(
+    request: Request,
+    payload: ForgotPasswordSchema = Body(...),
+    db: Session = Depends(get_db)
+):
+    email = payload.email
+
     user = db.query(UserModel).filter(UserModel.email == email).first()
 
-    # Do NOT reveal if user exists — security best practice
+    # Do NOT reveal if user exists
     if not user:
         return {"message": "If this email exists, a reset link has been sent."}
 
     reset_token = str(uuid4())
-
-    # Save token and expiry (15 mins or 1 hour recommended)
     user.reset_token = reset_token
     user.reset_token_expires = datetime.utcnow() + timedelta(minutes=30)
     db.commit()
 
-    reset_url = f"{request.base_url}api/auth/reset-password/{reset_token}"
+    reset_url = f"http://localhost:5173/reset-password/{reset_token}"
     send_password_reset_email(email, reset_url)
 
     return {"message": "If this email exists, a reset link has been sent."}
