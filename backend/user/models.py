@@ -3,9 +3,15 @@ from sqlalchemy.orm import relationship
 from auth.database import Base
 from sqlalchemy.sql import func
 from auth.models import RefreshToken
+from typing import Optional
+from datetime import datetime, timedelta
+from sqlalchemy import Column, String, DateTime
+
 
 class User(Base):
     __tablename__ = "users"
+    __allow_unmapped__ = True
+
 
     id = Column(Integer, primary_key=True, index=True)
 
@@ -17,12 +23,15 @@ class User(Base):
     phone_number = Column(String, unique=True, index=True, nullable=False)
     hashed_password = Column(String, nullable=False)
 
-    # OPTIONAL — ONLY THIS ONE
+    # OPTIONAL (as all business may not have PAN)
     pan_number = Column(String, index=True, nullable=True)
 
     # DEFAULTS
     is_active = Column(Boolean, default=False)
     email_token = Column(String, nullable=True)
+    reset_token = Column(String, nullable=True)
+    reset_token_expires = Column(DateTime, nullable=True)
+
 
     # Relationships
     refresh_tokens = relationship(

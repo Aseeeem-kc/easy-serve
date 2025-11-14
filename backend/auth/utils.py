@@ -118,3 +118,55 @@ def send_verification_email(to_email: str, verify_url: str):
         print(f"Verification email sent to {to_email}")
     except Exception as e:
         print(f"Failed to send verification email: {e}")
+
+
+def send_password_reset_email(to_email: str, reset_url: str):
+    """
+    Sends a password reset email with a clickable button.
+    :param to_email: Recipient email address
+    :param reset_url: Full reset link (must include http:// or https://)
+    """
+    subject = "Reset Your Password"
+
+    # HTML body with a reset button
+    body = f"""
+    <html>
+      <body>
+        <h3>Password Reset Request</h3>
+        <p>You requested to reset your password. Click the button below to continue:</p>
+        <p>
+          <a href="{reset_url}" style="
+            display: inline-block;
+            padding: 10px 20px;
+            font-size: 16px;
+            color: white;
+            background-color: #ff6b6b;
+            text-decoration: none;
+            border-radius: 5px;
+          ">Reset Password</a>
+        </p>
+        <p>If the button doesn’t work, copy and paste this link into your browser:</p>
+        <p>{reset_url}</p>
+
+        <br/>
+        <p>If you did NOT request a password reset, you can safely ignore this email.</p>
+      </body>
+    </html>
+    """
+
+    # Construct email message
+    msg = MIMEMultipart()
+    msg["From"] = EMAIL_USER
+    msg["To"] = to_email
+    msg["Subject"] = subject
+    msg.attach(MIMEText(body, "html"))
+
+    # Send the email via SMTP
+    try:
+        with smtplib.SMTP(EMAIL_HOST, EMAIL_PORT) as server:
+            server.starttls()
+            server.login(EMAIL_USER, EMAIL_PASS)
+            server.send_message(msg)
+        print(f"Password reset email sent to {to_email}")
+    except Exception as e:
+        print(f"Failed to send password reset email: {e}")

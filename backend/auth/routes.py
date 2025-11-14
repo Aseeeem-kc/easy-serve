@@ -3,7 +3,7 @@ from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 from auth.dependencies import get_db, authenticate_user, get_user_by_email
 from auth.models import TokenData, Token
-from auth.schemas import UserCreate, UserResponse, LoginSchema, MessageResponse
+from auth.schemas import UserCreate, UserResponse, LoginSchema, MessageResponse,  ResetPasswordSchema
 from user.models import User as UserModel
 from auth.utils import (
     get_password_hash, verify_password,
@@ -12,7 +12,7 @@ from auth.utils import (
 )
 from auth.models import RefreshToken
 from datetime import datetime, timedelta    
-from auth.utils import decode_token
+from auth.utils import decode_token, send_password_reset_email
 from fastapi.responses import JSONResponse
 from uuid import uuid4
 from fastapi.responses import JSONResponse
@@ -162,3 +162,52 @@ def logout(request: Request, db: Session = Depends(get_db)):
     response.delete_cookie("refresh_token", path="/api/auth/refresh")
 
     return response
+
+
+# -------------------------
+# FORGOT PASSWORD
+# -------------------------
+@router.post("/forgot-password", response_model=MessageResponse)
+def forgot_password(request: Request, email: str, db: Session = Depends(get_db)):
+    user = db.query(UserModel).filter(UserModel.email == email).first()
+
+    # Do NOT reveal if user exists — security best practice
+    if not user:
+        return {"message": "If this email exists, a reset link has been sent."}
+
+    reset_token = str(uuid4())
+
+    # Save token and expiry (15 mins or 1 hour recommended)
+    user.reset_token = reset_token
+    user.reset_token_expires = datetime.utcnow() + timedelta(minutes=30)
+    db.commit()
+
+    reset_url = f"{request.base_url}api/auth/reset-password/{reset_token}"
+    send_password_reset_email(email, reset_url)
+
+    return {"message": "If this email exists, a reset link has been sent."}
+
+# -------------------------
+# RESET PASSWORD
+# -------------------------
+@router.post("/reset-password/{token}", response_model=MessageResponse)
+def reset_password(token: str, data: ResetPasswordSchema, db: Session = Depends(get_db)):
+    user = db.query(UserModel).filter(UserModel.reset_token == token).first()
+
+    if not user:
+        raise HTTPException(status_code=400, detail="Invalid token")
+
+    # Check expiry
+    if not user.reset_token_expires or user.reset_token_expires < datetime.utcnow():
+        raise HTTPException(status_code=400, detail="Token has expired")
+
+    # Update password
+    user.hashed_password = get_password_hash(data.password)
+
+    # Clear token
+    user.reset_token = None
+    user.reset_token_expires = None
+
+    db.commit()
+
+    return {"message": "Password reset successful. You can now log in."}

@@ -31,3 +31,8 @@ class LoginSchema(BaseModel):
 
 class MessageResponse(BaseModel):
     message: str
+
+
+# reset password schema
+class ResetPasswordSchema(BaseModel):
+    password: str
