@@ -4,28 +4,28 @@ import { Star, Quote } from "lucide-react";
 const Testimonials: React.FC = () => {
   const testimonials = [
     { 
-      name: "Sarah Johnson", 
-      role: "Customer Success Manager",
-      company: "TechCorp",
+      name: "Aashna Neupane", 
+      role: "CEO",
+      company: "Zenivo",
       text: "EasyServe cut our support response time in half! Our customers are happier than ever, and our team can focus on complex issues instead of repetitive questions.",
       rating: 5,
-      avatar: "SJ"
+      avatar: "AN"
     },
     { 
-      name: "Michael Chen", 
-      role: "Head of Operations",
-      company: "StartupHub",
+      name: "Nabin Pyakurel", 
+      role: "CFO",
+      company: "Vedic Hub",
       text: "The AI is smarter than I expected. It handles context beautifully and rarely needs human intervention. The analytics dashboard is a game-changer for our team.",
       rating: 5,
-      avatar: "MC"
+      avatar: "NP"
     },
     { 
-      name: "Emily Rodriguez", 
-      role: "CTO",
-      company: "GrowthLabs",
+      name: "Prajen Shrestha", 
+      role: "Customer Support Lead",
+      company: "Food-mandu",
       text: "Integration was seamless and fast. We were up and running in less than a day. The multi-agent framework adapts perfectly to our diverse customer base.",
       rating: 5,
-      avatar: "ER"
+      avatar: "PS"
     }
   ];
 

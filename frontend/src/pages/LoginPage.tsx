@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Mail, Lock, AlertCircle, Sparkles, ArrowRight } from "lucide-react";
+import { Mail, Lock, AlertCircle, ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";   
 import { tokenStore } from "../auth/tokenStore";
 
@@ -85,7 +85,7 @@ const LoginPage: React.FC = () => {
           </div>
           <div className="text-center mb-8">
             <div className="inline-flex items-center px-4 py-2 rounded-full bg-gradient-to-r from-gray-900 to-gray-700 text-white mb-4 shadow-lg">
-              <Sparkles className="w-4 h-4 mr-2" /> 
+              
               <span className="text-sm font-semibold">Welcome Back</span>
             </div>
             <h2 className="text-3xl font-bold text-gray-900 mb-2">Sign In</h2>
@@ -128,7 +128,7 @@ const LoginPage: React.FC = () => {
                 <a href="/forgot-password" className="text-sm text-gray-600 hover:text-gray-900 font-medium">
                   Forgot?
                 </a>
-              </div>
+              </div>  
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
                 <input

@@ -44,9 +44,15 @@ const CTA: React.FC = () => {
               Start Free Trial
               <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
             </button>
-            <button className="border-2 border-white/30 text-white px-8 py-4 rounded-xl font-semibold hover:bg-white/10 backdrop-blur-sm transition-all inline-flex items-center justify-center">
-              Schedule a Demo
-            </button>
+            <a
+            href="https://calendar.app.google/9x5vBf1FhQpH4G6L9"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="border-2 border-white/30 text-white px-8 py-4 rounded-xl font-semibold hover:bg-white/10 backdrop-blur-sm transition-all inline-flex items-center justify-center"
+          >
+            Schedule a Demo
+          </a>
+
           </div>
 
           {/* Trust indicators */}
