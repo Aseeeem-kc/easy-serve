@@ -115,9 +115,15 @@ const FAQ: React.FC = () => {
             Our team is here to help. Get in touch and we'll respond within 24 hours.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <button className="bg-white text-gray-900 px-8 py-4 rounded-xl font-semibold shadow-lg hover:bg-gray-100 transition-all hover:scale-105">
-              Contact Support
-            </button>
+          <a
+          href="https://calendar.app.google/9x5vBf1FhQpH4G6L9"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="bg-white text-gray-900 px-8 py-4 rounded-xl font-semibold shadow-lg hover:bg-gray-100 transition-all hover:scale-105"
+        >
+          Contact Support
+        </a>
+
             <button className="border-2 border-white text-white px-8 py-4 rounded-xl font-semibold hover:bg-white/10 transition-all">
               Schedule a Demo
             </button>
