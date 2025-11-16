@@ -1,5 +1,5 @@
 import React from "react";
-import { Mail, Linkedin, Twitter, Github, ArrowRight, Sparkles } from "lucide-react";
+import { Mail, Linkedin, Twitter, Github } from "lucide-react";
 
 const Footer: React.FC = () => {
   return (
@@ -193,8 +193,7 @@ const Footer: React.FC = () => {
             </div>
             
             <div className="flex items-center gap-2 text-sm text-gray-500">
-              <span>Built with</span>
-              <Sparkles className="w-4 h-4 text-gray-400" />
+              <span>Built with Love</span>
               <span>by the EasyServe Team</span>
             </div>
           </div>
