@@ -1,5 +1,3 @@
-Here's your updated README with enhanced design matching your website's theme:
-markdown# 🚀 EasyServe
 
 <div align="center">
   <img src="https://raw.githubusercontent.com/Aseeeem-kc/easy-serve/refs/heads/main/frontend/src/assets/easyservelogo2.png" alt="EasyServe Logo" width="200">
