@@ -9,7 +9,6 @@ import {
   Phone,
   CheckCircle,
   AlertCircle,
-  Sparkles,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 
@@ -130,7 +129,7 @@ const SignupPage: React.FC = () => {
           {/* Header */}
           <div className="text-center mb-8">
             <div className="inline-flex items-center px-4 py-2 rounded-full bg-gradient-to-r from-gray-900 to-gray-700 text-white mb-4 shadow-lg">
-              <Sparkles className="w-4 h-4 mr-2" />
+              
               <span className="text-sm font-semibold">Join EasyServe</span>
             </div>
             <h2 className="text-3xl font-bold text-gray-900 mb-2">

@@ -12,7 +12,7 @@ const Footer: React.FC = () => {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
         {/* Newsletter Section */}
-        <div className="py-12 border-b border-gray-800">
+        {/* <div className="py-12 border-b border-gray-800">
           <div className="grid md:grid-cols-2 gap-8 items-center">
             <div>
               <h3 className="text-2xl font-bold text-white mb-2">
@@ -34,7 +34,7 @@ const Footer: React.FC = () => {
               </button>
             </div>
           </div>
-        </div>
+        </div> */}
 
         {/* Main Footer Content */}
         <div className="py-12 grid md:grid-cols-5 gap-12">
@@ -62,14 +62,14 @@ const Footer: React.FC = () => {
                 <Twitter className="w-5 h-5 text-gray-400" />
               </a>
               <a 
-                href="#" 
+                href="https://github.com/Aseeeem-kc/easy-serve" 
                 className="w-10 h-10 bg-gray-800 hover:bg-gray-700 rounded-lg flex items-center justify-center transition-colors border border-gray-700 hover:border-gray-600"
                 aria-label="LinkedIn"
               >
                 <Linkedin className="w-5 h-5 text-gray-400" />
               </a>
               <a 
-                href="#" 
+                href="https://github.com/Aseeeem-kc/easy-serve" 
                 className="w-10 h-10 bg-gray-800 hover:bg-gray-700 rounded-lg flex items-center justify-center transition-colors border border-gray-700 hover:border-gray-600"
                 aria-label="Github"
               >

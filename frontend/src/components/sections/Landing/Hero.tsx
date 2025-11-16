@@ -36,7 +36,7 @@ const Hero: React.FC = () => {
 
             <div className="flex flex-col sm:flex-row gap-4">
               <button className="bg-gradient-to-r from-gray-900 to-gray-800 hover:from-gray-800 hover:to-gray-700 text-white px-8 py-4 rounded-xl flex items-center justify-center font-semibold shadow-lg hover:shadow-xl transition-all hover:scale-105">
-                Start Free Trial <ArrowRight className="ml-2 w-5 h-5" />
+                Book a Discovery Call <ArrowRight className="ml-2 w-5 h-5" />
               </button>
               <button className="border-2 border-gray-300 text-gray-700 px-8 py-4 rounded-xl bg-white hover:bg-gray-50 transition-all font-semibold shadow-md hover:shadow-lg">
                 ▶ Watch Demo
