@@ -32,6 +32,8 @@ class User(Base):
     reset_token = Column(String, nullable=True)
     reset_token_expires = Column(DateTime, nullable=True)
 
+    # OAuth field
+    oauth_provider = Column(String, nullable=True)
 
     # Relationships
     refresh_tokens = relationship(

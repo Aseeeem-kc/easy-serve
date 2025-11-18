@@ -14,6 +14,11 @@ import { Link } from "react-router-dom";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
+const handleGoogleLogin = () => {
+  window.location.href = "http://localhost:8000/api/auth/google";
+};
+
+
 const SignupPage: React.FC = () => {
   const [formData, setFormData] = useState({
     username: "",
@@ -345,7 +350,7 @@ const SignupPage: React.FC = () => {
 
           {/* Google Login */}
           <div className="mt-6 grid gap-3">
-            <button className="flex items-center justify-center px-4 py-3 border-2 border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+            <button onClick={handleGoogleLogin} className="flex items-center justify-center px-4 py-3 border-2 border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
               <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24">
                 <path
                   fill="#4285F4"
