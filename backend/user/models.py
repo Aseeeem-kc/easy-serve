@@ -16,11 +16,11 @@ class User(Base):
     id = Column(Integer, primary_key=True, index=True)
 
     # REQUIRED
-    username = Column(String, unique=True, index=True, nullable=False)
-    company_name = Column(String, unique=True, index=True, nullable=False)
+    username = Column(String, index=True, nullable=False)
+    company_name = Column(String, index=True, nullable=False)
     location = Column(String, nullable=False)
     email = Column(String, unique=True, index=True, nullable=False)
-    phone_number = Column(String, unique=True, index=True, nullable=False)
+    phone_number = Column(String, index=True, nullable=False)
     hashed_password = Column(String, nullable=False)
 
     # OPTIONAL (as all business may not have PAN)
@@ -32,6 +32,8 @@ class User(Base):
     reset_token = Column(String, nullable=True)
     reset_token_expires = Column(DateTime, nullable=True)
 
+    # OAuth field
+    oauth_provider = Column(String, nullable=True)
 
     # Relationships
     refresh_tokens = relationship(

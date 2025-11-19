@@ -20,6 +20,7 @@ interface ProfileData {
   business_goals: string;
 }
 
+
 interface EditableFields {
   industry: string;
   company_size: string;
@@ -130,10 +131,14 @@ const ProfilePage: React.FC = () => {
     }));
   };
 
+  
+
+  
   const handleSaveProfile = async () => {
     setSaving(true);
     setError(null);
     setSuccessMessage(null);
+    console.log("Edited Data:", editedData);
 
     try {
       let accessToken = tokenStore.get();
@@ -149,22 +154,31 @@ const ProfilePage: React.FC = () => {
           return;
         }
       }
+      
+      // Convert empty strings ("") to null
+const cleanData = Object.fromEntries(
+  Object.entries(editedData).map(([key, value]) => [
+    key,
+    value === "" ? null : value
+  ])
+);
 
-      const res = await fetch(`/api/profile/edit`, {
-        method: "PATCH",
-        headers: {
-          "Authorization": `Bearer ${accessToken}`,
-          "Content-Type": "application/json"
-        },
-        credentials: "include",
-        body: JSON.stringify(editedData)
-      });
+const res = await fetch(`/api/profile/edit`, {
+  method: "PATCH",
+  headers: {
+    "Authorization": `Bearer ${accessToken}`,
+    "Content-Type": "application/json"
+  },
+  credentials: "include",
+  body: JSON.stringify(cleanData)
+});
+
 
       if (res.status === 401) {
         tokenStore.clear();
         return handleSaveProfile();
       }
-
+      
       if (!res.ok) {
         const errorData = await res.json();
         throw new Error(errorData.detail || "Failed to update profile");
@@ -173,6 +187,7 @@ const ProfilePage: React.FC = () => {
 
       const updatedProfile = await res.json();
       setProfile(updatedProfile);
+      
       setIsEditing(false);
       setSuccessMessage("Profile updated successfully!");
       

@@ -18,6 +18,16 @@ from uuid import uuid4
 from fastapi.responses import JSONResponse
 from user.models import ClientProfile
 from fastapi import Request
+from fastapi import APIRouter, Depends, Request
+from fastapi.responses import RedirectResponse
+from sqlalchemy.orm import Session
+from uuid import uuid4
+from .oauth import google
+from user.models import User as UserModel
+import os
+
+router = APIRouter(prefix="/api/auth", tags=["Auth"])
+
 
 router = APIRouter()
 
@@ -27,42 +37,59 @@ router = APIRouter()
 # ------------------------- 
 @router.post("/signup", response_model=MessageResponse)
 def signup(user: UserCreate, request: Request, db: Session = Depends(get_db)):
+    # 1. Check if email exists
     if db.query(UserModel).filter(UserModel.email == user.email).first():
         raise HTTPException(400, "Email already registered")
 
+    # 2. Hash password & generate token
     hashed_password = get_password_hash(user.password)
     token = str(uuid4())
 
-    # 1. Create User
-    new_user = UserModel(
-        username=user.username,
-        company_name=user.company_name,
-        location=user.location,
-        pan_number=user.pan_number,
-        email=user.email,
-        phone_number=user.phone_number,
-        hashed_password=hashed_password,
-        is_active=False,
-        email_token=token
-    )
-    db.add(new_user)
-    db.commit()
-    db.refresh(new_user)
+    try:
+        # 3. Create User
+        new_user = UserModel(
+            username=user.username,
+            company_name=user.company_name,
+            location=user.location,
+            pan_number=user.pan_number,
+            email=user.email,
+            phone_number=user.phone_number,
+            hashed_password=hashed_password,
+            is_active=False,
+            email_token=token
+        )
+        db.add(new_user)
+        db.commit()
+        db.refresh(new_user)
 
-    # 2. Create minimal ClientProfile (only required fields)
-    profile = ClientProfile(
-        user_id=new_user.id,
-        industry="Unknown"  
-    )
-    db.add(profile)
-    db.commit()
+        # 4. Create Empty Profile for the New User
+        empty_profile = ClientProfile(
+            user_id=new_user.id,
+            industry="Unknown",               # Can't leave NULL due to NOT NULL constraint
+            company_size=None,
+            website_url=None,
+            primary_usecase=None,
+            business_goals=None,
+            timezone="Asia/Kathmandu",
+            language="en",
+            knowledge_base_status="pending",
+            documents_uploaded_count=0,
+            kb_processing_status="idle",
+            subscription_plan="basic",
+            is_onboarded=False
+        )
+        db.add(empty_profile)
+        db.commit()
 
-    # 3. Send email
-    verify_url = f"{request.base_url}api/auth/verify/{token}"
-    send_verification_email(user.email, verify_url)
+        # 5. Send verification email
+        verify_url = f"{request.base_url}api/auth/verify/{token}"
+        send_verification_email(user.email, verify_url)
 
-    return {"message": "Signup successful! Please verify your email."}
+        return {"message": "Signup successful! Please verify your email."}
 
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=str(e))
 # -------------------------
 # EMAIL VERIFICATION
 # -------------------------
@@ -218,3 +245,89 @@ def reset_password(token: str, data: ResetPasswordSchema, db: Session = Depends(
     db.commit()
 
     return {"message": "Password reset successful. You can now log in."}
+
+
+# -------------------------
+# GOOGLE OAUTH LOGIN
+# -------------------------
+@router.get("/google")
+async def google_login(request: Request):
+    redirect_uri = request.url_for("google_callback")
+    return await google.authorize_redirect(request, redirect_uri)
+
+
+# -------------------------
+# GOOGLE OAUTH CALLBACK
+# -------------------------
+@router.get("/google/callback")
+async def google_callback(request: Request, db: Session = Depends(get_db)):
+    token = await google.authorize_access_token(request)
+    user_info = token.get("userinfo") or token.get("id_token_claims")
+    
+    if not user_info:
+        return {"error": "Failed to retrieve user info from Google."}
+
+    email = user_info.get("email")
+    name = user_info.get("name")
+    
+    # Check or create user
+    user = db.query(UserModel).filter_by(email=email).first()
+    if not user:
+        user = UserModel(
+            email=email,
+            username=name.replace(" ", "_"),
+            company_name="N/A",
+            location="N/A",
+            phone_number="0000000000",
+            hashed_password="oauth_user",
+            oauth_provider="google"
+        )
+        db.add(user)
+        db.commit()
+        db.refresh(user)
+    
+    # 4. Create Empty Profile for the New User
+        empty_profile = ClientProfile(
+            user_id=user.id,
+            industry="Unknown",               # Can't leave NULL due to NOT NULL constraint
+            company_size=None,
+            website_url=None,
+            primary_usecase=None,
+            business_goals=None,
+            timezone="Asia/Kathmandu",
+            language="en",
+            knowledge_base_status="pending",
+            documents_uploaded_count=0,
+            kb_processing_status="idle",
+            subscription_plan="basic",
+            is_onboarded=False
+        )
+        db.add(empty_profile)
+        db.commit()
+
+    # Create access + refresh tokens
+    access_token = create_access_token({"sub": user.email})
+    refresh_token, _ = create_refresh_token({"sub": user.email})
+
+    # Save refresh token in database
+    db_token = RefreshToken(
+        token=refresh_token,
+        user_id=user.id,
+        expires_at=datetime.utcnow() + timedelta(days=7)
+    )
+    db.add(db_token)
+    db.commit()
+
+    # Redirect response with cookie
+    frontend_redirect = f"{os.getenv('FRONTEND_REDIRECT_URI')}?token={access_token}"
+    response = RedirectResponse(frontend_redirect)
+    response.set_cookie(
+        key="refresh_token",
+        value=refresh_token,
+        httponly=True,
+        secure=False,  # True in prod
+        samesite="lax",
+        path="/"
+    )
+
+    return response
