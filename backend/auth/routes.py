@@ -285,6 +285,25 @@ async def google_callback(request: Request, db: Session = Depends(get_db)):
         db.add(user)
         db.commit()
         db.refresh(user)
+    
+    # 4. Create Empty Profile for the New User
+        empty_profile = ClientProfile(
+            user_id=user.id,
+            industry="Unknown",               # Can't leave NULL due to NOT NULL constraint
+            company_size=None,
+            website_url=None,
+            primary_usecase=None,
+            business_goals=None,
+            timezone="Asia/Kathmandu",
+            language="en",
+            knowledge_base_status="pending",
+            documents_uploaded_count=0,
+            kb_processing_status="idle",
+            subscription_plan="basic",
+            is_onboarded=False
+        )
+        db.add(empty_profile)
+        db.commit()
 
     # Create access + refresh tokens
     access_token = create_access_token({"sub": user.email})
