@@ -84,7 +84,7 @@ class ClientProfile(Base):
 
     # Relationships
     user = relationship("User", back_populates="client_profile")
-    
+    tickets = relationship("Ticket", back_populates="client_profile", cascade="all, delete-orphan")
     knowledge_documents = relationship(
         "KnowledgeDocument",
         back_populates="client_profile",

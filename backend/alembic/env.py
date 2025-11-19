@@ -9,6 +9,7 @@ load_dotenv()
 
 from auth.database import Base  # SQLAlchemy Base
 from user.models import ClientProfile, KnowledgeDocument, User
+from tms.models import Ticket, TicketPriority, TicketStatus
 
 DB_USER = os.getenv("DB_USER", "ashim")
 DB_PASSWORD = os.getenv("DB_PASSWORD", "2024")
