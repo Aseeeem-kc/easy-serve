@@ -1,5 +1,5 @@
 from sqlalchemy.orm import Session
-from database import SessionLocal
+# from database import SessionLocal
 from user.models import KnowledgeDocument
 from .extractor import extract_text
 from .chunker import chunk_text
@@ -13,7 +13,8 @@ def process_document_pipeline(doc_id: int, file_path: str):
     Extract → Chunk → Embed → Store → Update DB
     """
 
-    db: Session = SessionLocal()
+    db: Session 
+    # = SessionLocal()
 
     try:
         # Fetch document
