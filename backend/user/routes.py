@@ -9,8 +9,14 @@ from user.schemas import (
     KnowledgeDocumentResponse, ClientProfileResponse, UserProfileResponse
 )
 from datetime import datetime
+import os
+from rag.services.document_pipeline import process_document_pipeline
+from fastapi import BackgroundTasks
 
 router = APIRouter(prefix="/onboarding", tags=["Onboarding"])
+
+STORAGE_DIR = "storage/documents"
+os.makedirs(STORAGE_DIR, exist_ok=True)
 
 # -------------------------
 # COMPLETE BUSINESS ONBOARDING
@@ -85,17 +91,95 @@ async def upload_knowledge_document(
 # -------------------------
 # GET ALL KNOWLEDGE DOCUMENTS
 # -------------------------
-@router.get("/documents", response_model=List[KnowledgeDocumentResponse])
-def get_knowledge_documents(
-    current_user: UserModel = Depends(get_current_user),
+@router.post("/documents", response_model=KnowledgeDocumentResponse)
+async def upload_knowledge_document(
+    file: UploadFile = File(...),
+    background_tasks: BackgroundTasks = Depends(),
+    current_user = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
-    profile = db.query(ClientProfile).filter(ClientProfile.user_id == current_user.id).first()
+    """
+    Upload a knowledge document (PDF, TXT, DOC) → 
+    Save to disk → 
+    Create DB record → 
+    Trigger background processing pipeline
+    """
+
+    # -------------------------
+    # 1. Check user profile
+    # -------------------------
+    profile = (
+        db.query(ClientProfile)
+        .filter(ClientProfile.user_id == current_user.id)
+        .first()
+    )
     if not profile:
-        return []
-    
-    docs = db.query(KnowledgeDocument).filter(KnowledgeDocument.client_profile_id == profile.id).all()
-    return docs
+        raise HTTPException(status_code=400, detail="Complete business profile first")
+
+    # -------------------------
+    # 2. Validate file type
+    # -------------------------
+    allowed_types = [
+        "application/pdf",
+        "text/plain",
+        "application/msword",
+        "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+    ]
+
+    if file.content_type not in allowed_types:
+        raise HTTPException(status_code=400, detail="Only PDF, TXT, DOC files allowed")
+
+    # Read bytes
+    content = await file.read()
+    file_size = len(content)
+
+    # -------------------------
+    # 3. Create DB record
+    # -------------------------
+    doc = KnowledgeDocument(
+        client_profile_id=profile.id,
+        file_name=file.filename,
+        file_type=file.content_type,
+        file_size=file_size,
+        processed=False
+    )
+    db.add(doc)
+    db.commit()
+    db.refresh(doc)
+
+    # -------------------------
+    # 4. Save file to disk
+    # -------------------------
+    file_path = f"{STORAGE_DIR}/{doc.id}_{file.filename}"
+    try:
+        with open(file_path, "wb") as f:
+            f.write(content)
+    except Exception:
+        db.delete(doc)
+        db.commit()
+        raise HTTPException(status_code=500, detail="Failed to save file")
+
+    # -------------------------
+    # 5. Update profile metadata
+    # -------------------------
+    profile.documents_uploaded_count += 1
+    profile.kb_processing_status = "processing"
+    profile.last_kb_update = datetime.utcnow()
+    db.commit()
+
+    # -------------------------
+    # 6. Trigger background processing
+    # -------------------------
+    background_tasks.add_task(
+        process_document_pipeline,
+        doc_id=doc.id,
+        file_path=file_path
+    )
+
+    # -------------------------
+    # 7. Return DB record
+    # -------------------------
+    return doc
 
 # -------------------------
 # GET FULL USER PROFILE
