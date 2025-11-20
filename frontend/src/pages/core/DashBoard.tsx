@@ -223,7 +223,7 @@ const SupportDashboard: React.FC = () => {
 </button>
 
           <button
-            onClick={() => setActiveTab("analytics")}
+            onClick={() => window.location.href = "/analytics"}
             className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg font-medium transition-colors ${
               activeTab === "analytics"
                 ? "bg-gray-900 text-white"
@@ -279,8 +279,8 @@ const SupportDashboard: React.FC = () => {
               <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
               <nav className="hidden md:flex space-x-6">
                 <a href="#" className="text-sm text-gray-900 font-medium border-b-2 border-gray-900 pb-1">Dashboard</a>
-                <a href="#" className="text-sm text-gray-600 hover:text-gray-900">Tickets</a>
-                <a href="#" className="text-sm text-gray-600 hover:text-gray-900">Analytics</a>
+                <button onClick={() => window.location.href = "/tickets"} className="text-sm text-gray-600 hover:text-gray-900">Tickets</button>
+                <button onClick={() => window.location.href = "/analytics"} className="text-sm text-gray-600 hover:text-gray-900">Analytics</button>
                 <a href="#" className="text-sm text-gray-600 hover:text-gray-900">Settings</a>
               </nav>
             </div>
