@@ -8,6 +8,8 @@ import ForgotPasswordPage from './pages/ForgotPasswordPage';
 import ResetPasswordPage from './pages/ResetPasswordPage';
 import OAuthSuccess from "./pages/OAuthSuccess";
 import TicketSolverPage from "./pages/core/TicketSolverPage";
+import AnalyticsPage from "./pages/core/AnalyticsPage";
+
 function App() {
   return (
     <Router>
@@ -22,6 +24,7 @@ function App() {
         <Route path="/reset-password/:token" element={<ResetPasswordPage />} />
         <Route path="/oauth-success" element={<OAuthSuccess />} />
         <Route path="/tickets" element={<TicketSolverPage />} />
+        <Route path="/analytics" element={<AnalyticsPage />} />
       </Routes>
     </Router>
   );
