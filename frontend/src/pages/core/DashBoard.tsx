@@ -210,17 +210,17 @@ const SupportDashboard: React.FC = () => {
             <span>Dashboard</span>
           </button>
 
-          <button
-            onClick={() => setActiveTab("tickets")}
-            className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg font-medium transition-colors ${
-              activeTab === "tickets"
-                ? "bg-gray-900 text-white"
-                : "text-gray-700 hover:bg-gray-100"
-            }`}
-          >
-            <Ticket className="w-5 h-5" />
-            <span>Ticket Solver</span>
-          </button>
+         <button
+  onClick={() => window.location.href = "/tickets"}
+  className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg font-medium transition-colors ${
+    window.location.pathname === "/tickets"
+      ? "bg-gray-900 text-white"
+      : "text-gray-700 hover:bg-gray-100"
+  }`}
+>
+  <Ticket className="w-5 h-5" />
+  <span>Ticket Solver</span>
+</button>
 
           <button
             onClick={() => setActiveTab("analytics")}
