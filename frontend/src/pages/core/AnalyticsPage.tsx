@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Home, TrendingUp, TrendingDown, BarChart3, PieChart, MessageSquare, Clock, Star, Users, Calendar, Download, Filter, RefreshCw, ArrowUpRight, ArrowDownRight } from "lucide-react";
+import { Home, TrendingUp, BarChart3, PieChart, MessageSquare, Clock, Star, Users, Calendar, Download, Filter, RefreshCw, ArrowUpRight, ArrowDownRight } from "lucide-react";
 
 const AnalyticsPage: React.FC = () => {
   const [timeRange, setTimeRange] = useState("7d");

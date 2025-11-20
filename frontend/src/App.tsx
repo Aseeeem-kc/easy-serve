@@ -25,6 +25,7 @@ function App() {
         <Route path="/oauth-success" element={<OAuthSuccess />} />
         <Route path="/tickets" element={<TicketSolverPage />} />
         <Route path="/analytics" element={<AnalyticsPage />} />
+
       </Routes>
     </Router>
   );
