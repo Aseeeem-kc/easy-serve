@@ -3,6 +3,7 @@ from sqlalchemy.orm import sessionmaker, declarative_base
 import os
 from dotenv import load_dotenv
 from urllib.parse import quote_plus
+from contextlib import contextmanager
 
 # Load environment variables
 load_dotenv()
@@ -25,3 +26,16 @@ engine = create_engine(
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 Base = declarative_base()
+
+
+def get_db():
+    """
+    Dependency for FastAPI endpoints. Yields a SQLAlchemy Session.
+    In production this will use SessionLocal bound to the production engine.
+    During tests we will override this dependency with override_get_db in conftest.py.
+    """
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()

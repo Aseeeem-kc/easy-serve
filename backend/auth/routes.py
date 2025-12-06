@@ -112,6 +112,12 @@ def verify_email(token: str, db: Session = Depends(get_db)):
 @router.post("/token")
 def login(credentials: LoginSchema, db: Session = Depends(get_db)):
     user = authenticate_user(db, credentials.email, credentials.password)
+    print("\n=== LOGIN ATTEMPT DEBUG ===")
+    print("Email used      :", credentials.email or credentials.username)
+    print("Plain password  :", credentials.password)
+    print("Stored hash     :", user.hashed_password)
+    print("Verify result   :", verify_password(credentials.password, user.hashed_password))
+    print("==========================\n")
     if not user:
         raise HTTPException(status_code=401, detail="Incorrect email or password")
 
