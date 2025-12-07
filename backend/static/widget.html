@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>EasyServe Chat Test</title>
+</head>
+<body>
+
+  <!-- CONFIG -->
+  <script>
+    window.EASYSERVE_CONFIG = {
+      primaryColor: "green",      // Chat button & header
+      textColor: "#ffffff",         // Text on header
+      bubbleColor: "#e0e7ff",       // AI messages
+      userColor: "#6366f1",         // User messages
+      position: "bottom-right",     // bottom-right, bottom-left, top-right, top-left
+      size: "normal",               // small, normal, large
+      welcomeMessage: "Hi! How can we help you?",
+      businessName: "EasyServe AI"
+    };
+  </script>
+
+  <!-- LOAD WIDGET FROM SAME ORIGIN -->
+  <script src="http://localhost:8000/static/widget.js"></script>
+</body>
+</html>
