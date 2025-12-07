@@ -82,6 +82,17 @@ class ClientProfile(Base):
     created_at = Column(DateTime, default=func.now())
     updated_at = Column(DateTime, default=func.now(), onupdate=func.now())
 
+    # === WIDGET CUSTOMIZATION ===
+    widget_primary_color = Column(String(20), default="#6366f1")      # Button + header
+    widget_text_color = Column(String(20), default="#ffffff")         # Text on header
+    widget_bubble_color = Column(String(20), default="#e0e7ff")       # AI messages
+    widget_user_bubble_color = Column(String(20), default="#6366f1")  # User messages
+    widget_position = Column(String(20), default="bottom-right")      # bottom-right, bottom-left, etc.
+    widget_size = Column(String(20), default="normal")                # small, normal, large
+    widget_welcome_message = Column(String(200), default="Hi! How can we help you today?")
+    widget_enabled = Column(Boolean, default=True)                    # Turn on/off
+    widget_title = Column(String(100), default="EasyServe AI")        # Header title
+
     # Relationships
     user = relationship("User", back_populates="client_profile")
     tickets = relationship("Ticket", back_populates="client_profile", cascade="all, delete-orphan")
