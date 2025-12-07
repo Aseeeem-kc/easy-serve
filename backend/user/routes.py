@@ -215,3 +215,22 @@ def activate_knowledge_base(
     db.commit()
     
     return {"message": "Knowledge base activated! RAG pipeline ready."}
+
+
+# backend/user/routes.py
+@router.get("/widget/config/{profile_id:int}")
+def get_widget_config(profile_id: int, db: Session = Depends(get_db)):
+    profile = db.query(ClientProfile).filter(ClientProfile.id == profile_id).first()
+    if not profile or not profile.widget_enabled:
+        raise HTTPException(404, "Widget disabled or client not found")
+
+    return {
+        "business_name": profile.widget_title or profile.user.company_name,
+        "primary_color": profile.widget_primary_color,
+        "text_color": profile.widget_text_color,
+        "bubble_color": profile.widget_bubble_color,
+        "user_bubble_color": profile.widget_user_bubble_color,
+        "welcome_message": profile.widget_welcome_message,
+        "position": profile.widget_position,
+        "size": profile.widget_size
+    }
