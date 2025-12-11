@@ -217,20 +217,49 @@ def activate_knowledge_base(
     return {"message": "Knowledge base activated! RAG pipeline ready."}
 
 
-# backend/user/routes.py
-@router.get("/widget/config/{profile_id:int}")
+# ——— PUBLIC ROUTE (for widget) ———
+@router.get("/widget/config/{profile_id:int}")  
 def get_widget_config(profile_id: int, db: Session = Depends(get_db)):
     profile = db.query(ClientProfile).filter(ClientProfile.id == profile_id).first()
-    if not profile or not profile.widget_enabled:
-        raise HTTPException(404, "Widget disabled or client not found")
+    if not profile:
+        raise HTTPException(404, "Client not found")
 
     return {
-        "business_name": profile.widget_title or profile.user.company_name,
-        "primary_color": profile.widget_primary_color,
-        "text_color": profile.widget_text_color,
-        "bubble_color": profile.widget_bubble_color,
-        "user_bubble_color": profile.widget_user_bubble_color,
-        "welcome_message": profile.widget_welcome_message,
-        "position": profile.widget_position,
-        "size": profile.widget_size
+        "business_name": profile.user.company_name,
+        "primary_color": profile.widget_primary_color or "#6366f1",
+        "text_color": profile.widget_text_color or "#ffffff",
+        "bubble_color": profile.widget_bubble_color or "#e0e7ff",
+        "user_bubble_color": profile.widget_user_bubble_color or "#6366f1",
+        "welcome_message": profile.widget_welcome_message or "Hi! How can we help?",
+        "position": profile.widget_position or "bottom-right",
+        "size": profile.widget_size or "normal"
+    }
+
+
+# backend/user/routes.py
+@router.get("/widget/code")
+def get_widget_embed_code(
+    current_user: UserModel = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    profile = db.query(ClientProfile).filter(ClientProfile.user_id == current_user.id).first()
+    if not profile:
+        raise HTTPException(404, "Profile not found")
+
+    embed_code = f'''
+<script>
+  window.EASYSERVE_CONFIG = {{
+    clientId: "{profile.id}",  // using your existing id
+    businessName: "{profile.user.company_name}",
+    primaryColor: "{profile.widget_primary_color or '#6366f1'}",
+    welcomeMessage: "{profile.widget_welcome_message or 'Hi! How can we help?'}"
+  }};
+</script>
+<script src="http://localhost:8000/static/widget.js" async></script>
+    '''.strip()
+
+    return {
+        "embed_code": embed_code,
+        "preview_url": f"http://localhost:8000/static/widget.html?clientId={profile.id}",
+        "client_id": profile.id
     }

@@ -9,6 +9,8 @@ import ResetPasswordPage from './pages/ResetPasswordPage';
 import OAuthSuccess from "./pages/OAuthSuccess";
 import TicketSolverPage from "./pages/core/TicketSolverPage";
 import AnalyticsPage from "./pages/core/AnalyticsPage";
+import Settings from "./pages/settings";
+
 
 function App() {
   return (
@@ -17,6 +19,7 @@ function App() {
         <Route path="/" element={<LandingPage />} />
         <Route path="/signup" element={<SignupPage />} />
         <Route path="/signin" element={<LoginPage />} />
+        <Route path="/settings" element={<Settings />} />
 
         <Route path="/dashboard" element={<DashBoard />} />
         <Route path="/profile" element={<ProfilePage />} />
@@ -25,6 +28,8 @@ function App() {
         <Route path="/oauth-success" element={<OAuthSuccess />} />
         <Route path="/tickets" element={<TicketSolverPage />} />
         <Route path="/analytics" element={<AnalyticsPage />} />
+
+
 
       </Routes>
     </Router>
