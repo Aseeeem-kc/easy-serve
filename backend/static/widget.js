@@ -23,7 +23,7 @@
 
   // 3. Fetch real branding from your backend
   try {
-    const res = await fetch(`http://localhost:8000/api/widget/config/${clientId}`);
+    const res = await fetch(`http://localhost:8000/api/users/onboarding/widget/config/${clientId}`);
     if (res.ok) {
       const data = await res.json();
       c = { ...c, ...data };  // Merge with defaults

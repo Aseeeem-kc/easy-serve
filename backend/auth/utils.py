@@ -14,19 +14,20 @@ EMAIL_USER = os.getenv("EMAIL_USER")
 EMAIL_PASS = os.getenv("EMAIL_PASS")
 
 # Config
-SECRET_KEY = ""
-REFRESH_SECRET_KEY = ""
+SECRET_KEY = os.getenv("SECRET_KEY", "")
+REFRESH_SECRET_KEY = os.getenv("REFRESH_SECRET_KEY", "")
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 15
 REFRESH_TOKEN_EXPIRE_DAYS = 7
 
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+pwd_context = CryptContext(schemes=["argon2"], deprecated="auto")
 
 
 # --------------------------
 # Password Helpers
 # --------------------------
 def verify_password(plain_password, hashed_password):
+
     return pwd_context.verify(plain_password, hashed_password)
 
 def get_password_hash(password):
