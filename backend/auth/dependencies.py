@@ -10,7 +10,7 @@ from auth.utils import SECRET_KEY, ALGORITHM
 
 Base.metadata.create_all(bind=engine)
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/token")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/auth/token")
 
 def get_db():
     db = SessionLocal()

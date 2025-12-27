@@ -1,5 +1,5 @@
 from sqlalchemy.orm import Session
-# from database import SessionLocal
+from auth.database import SessionLocal
 from user.models import KnowledgeDocument
 from .extractor import extract_text
 from .chunker import chunk_text
@@ -13,8 +13,7 @@ def process_document_pipeline(doc_id: int, file_path: str):
     Extract → Chunk → Embed → Store → Update DB
     """
 
-    db: Session 
-    # = SessionLocal()
+    db: Session = SessionLocal()
 
     try:
         # Fetch document
@@ -40,7 +39,7 @@ def process_document_pipeline(doc_id: int, file_path: str):
         embeddings = embed_text(chunks)
 
         # -------------------------
-        # 4. Store embeddings in PGVector
+        # 4. Store embeddings in ChromaDB
         # -------------------------
         store_embeddings(db, doc_id, chunks, embeddings)
 

@@ -18,4 +18,4 @@ def embed_text(chunks: list[str]):
         contents=contents
     )
 
-    return [item.embedding for item in response.embeddings]
+    return [item.values for item in response.embeddings]

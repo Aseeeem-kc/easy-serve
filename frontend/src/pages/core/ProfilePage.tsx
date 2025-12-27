@@ -1,5 +1,5 @@
 import React, { useState, useEffect, type JSX } from "react";
-import { User, Building2, Globe, Settings, Clock, Languages, FileText, CheckCircle, AlertCircle, Crown, Calendar, Sparkles, Edit2, Save, X, Target } from "lucide-react";
+import { User, Building2, Globe, Settings, Clock, Languages, FileText, CheckCircle, AlertCircle, Crown, Calendar, Sparkles, Edit2, Save, X, Target, Upload } from "lucide-react";
 import { tokenStore } from "../../auth/tokenStore";
 
 interface ProfileData {
@@ -104,8 +104,8 @@ const ProfilePage: React.FC = () => {
       setLoading(false);
     }
   };
- 
-    
+
+
   const handleEditToggle = () => {
     if (isEditing && profile) {
       // Cancel editing - restore original values
@@ -119,7 +119,7 @@ const ProfilePage: React.FC = () => {
         language: profile.language || ""
       });
     }
-    
+
     setIsEditing(!isEditing);
     setSuccessMessage(null);
   };
@@ -131,9 +131,9 @@ const ProfilePage: React.FC = () => {
     }));
   };
 
-  
 
-  
+
+
   const handleSaveProfile = async () => {
     setSaving(true);
     setError(null);
@@ -154,31 +154,31 @@ const ProfilePage: React.FC = () => {
           return;
         }
       }
-      
-      // Convert empty strings ("") to null
-const cleanData = Object.fromEntries(
-  Object.entries(editedData).map(([key, value]) => [
-    key,
-    value === "" ? null : value
-  ])
-);
 
-const res = await fetch(`/api/profile/edit`, {
-  method: "PATCH",
-  headers: {
-    "Authorization": `Bearer ${accessToken}`,
-    "Content-Type": "application/json"
-  },
-  credentials: "include",
-  body: JSON.stringify(cleanData)
-});
+      // Convert empty strings ("") to null
+      const cleanData = Object.fromEntries(
+        Object.entries(editedData).map(([key, value]) => [
+          key,
+          value === "" ? null : value
+        ])
+      );
+
+      const res = await fetch(`/api/profile/edit`, {
+        method: "PATCH",
+        headers: {
+          "Authorization": `Bearer ${accessToken}`,
+          "Content-Type": "application/json"
+        },
+        credentials: "include",
+        body: JSON.stringify(cleanData)
+      });
 
 
       if (res.status === 401) {
         tokenStore.clear();
         return handleSaveProfile();
       }
-      
+
       if (!res.ok) {
         const errorData = await res.json();
         throw new Error(errorData.detail || "Failed to update profile");
@@ -187,10 +187,10 @@ const res = await fetch(`/api/profile/edit`, {
 
       const updatedProfile = await res.json();
       setProfile(updatedProfile);
-      
+
       setIsEditing(false);
       setSuccessMessage("Profile updated successfully!");
-      
+
       setTimeout(() => setSuccessMessage(null), 3000);
     } catch (err: any) {
       console.error("Profile update error:", err.message);
@@ -209,6 +209,64 @@ const res = await fetch(`/api/profile/edit`, {
   };
   console.log(profile?.company_size);
   console.log(profile?.primary_usecase);
+  const [uploading, setUploading] = useState(false);
+
+  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    setUploading(true);
+    setSuccessMessage(null);
+    setError(null);
+
+    try {
+      let accessToken = tokenStore.get();
+      if (!accessToken) {
+        const refreshRes = await fetch(`/api/auth/refresh`, { method: "POST", credentials: "include" });
+        if (refreshRes.ok) {
+          const refreshData = await refreshRes.json();
+          tokenStore.set(refreshData.access_token);
+          accessToken = refreshData.access_token;
+        } else {
+          window.location.href = "/signin";
+          return;
+        }
+      }
+
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const res = await fetch(`http://localhost:8000/api/rag/upload`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+        body: formData,
+        credentials: "include",
+      });
+
+      if (res.status === 401) {
+        tokenStore.clear();
+        return;
+      }
+
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.detail || "Upload failed");
+      }
+
+      const data = await res.json();
+      setSuccessMessage(`File uploaded successfully! Doc ID: ${data.document_id}`);
+      setUploading(false);
+      // Refresh profile data to show new counts
+      fetchProfileData();
+
+    } catch (err: any) {
+      console.error("Upload error:", err);
+      setError(err.message);
+      setUploading(false);
+    }
+  };
 
 
   const getStatusBadge = (status: string) => {
@@ -219,7 +277,7 @@ const res = await fetch(`/api/profile/edit`, {
       idle: { color: "bg-gray-100 text-gray-800 border-gray-300", text: "Idle" },
       failed: { color: "bg-red-100 text-red-800 border-red-300", text: "Failed" }
     };
-    
+
     const badge = statusMap[status] || statusMap.idle;
     return (
       <span className={`px-3 py-1 rounded-full text-xs font-semibold border ${badge.color}`}>
@@ -234,7 +292,7 @@ const res = await fetch(`/api/profile/edit`, {
       pro: { color: "bg-blue-100 text-blue-800 border-blue-300", icon: <Sparkles className="w-4 h-4" /> },
       enterprise: { color: "bg-purple-100 text-purple-800 border-purple-300", icon: <Crown className="w-4 h-4" /> }
     };
-    
+
     const badge = planMap[plan.toLowerCase()] || planMap.basic;
     return (
       <span className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold border ${badge.color}`}>
@@ -462,7 +520,7 @@ const res = await fetch(`/api/profile/edit`, {
                       className="w-full ml-8 border-2 border-gray-300 rounded-lg p-2 focus:border-gray-900 focus:outline-none"
                     />
                   ) : (
-                    <a 
+                    <a
                       href={profile.website_url}
                       target="_blank"
                       rel="noopener noreferrer"
@@ -605,10 +663,23 @@ const res = await fetch(`/api/profile/edit`, {
 
             {/* Knowledge Base Status */}
             <div className="mb-8">
-              <h3 className="text-xl font-bold text-gray-900 flex items-center gap-2 mb-4">
-                <FileText className="w-6 h-6 text-gray-700" />
-                Knowledge Base
-              </h3>
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-xl font-bold text-gray-900 flex items-center gap-2">
+                  <FileText className="w-6 h-6 text-gray-700" />
+                  Knowledge Base
+                </h3>
+                <label className={`cursor-pointer bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium flex items-center gap-2 transition-colors ${uploading ? 'opacity-50 cursor-not-allowed' : ''}`}>
+                  <Upload className="w-4 h-4" />
+                  {uploading ? "Uploading..." : "Upload Document"}
+                  <input
+                    type="file"
+                    className="hidden"
+                    onChange={handleFileUpload}
+                    disabled={uploading}
+                    accept=".pdf,.txt,.docx,.md"
+                  />
+                </label>
+              </div>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div className="bg-gray-50 rounded-xl p-4 border border-gray-200">

@@ -60,20 +60,23 @@ class GroqChatLLM:
     Compatible with LangGraph.
     """
 
-    def invoke(self, prompt: str):
+    def invoke(self, prompt: str, system_prompt: str = None):
+        if system_prompt is None:
+            system_prompt = (
+                "You are a backend API service.\n"
+                "You must return ONLY valid JSON.\n"
+                "No explanations.\n"
+                "No reasoning.\n"
+                "No markdown.\n"
+                "If unsure, still output valid JSON."
+            )
+
         response = client.chat.completions.create(
             model="openai/gpt-oss-120b",
             messages=[
                 {
                     "role": "system",
-                    "content": (
-                        "You are a backend API service.\n"
-                        "You must return ONLY valid JSON.\n"
-                        "No explanations.\n"
-                        "No reasoning.\n"
-                        "No markdown.\n"
-                        "If unsure, still output valid JSON."
-                    ),
+                    "content": system_prompt,
                 },
                 {
                     "role": "user",
